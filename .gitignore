@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+
+# Reference PDFs (not our paper)
+/*.pdf
+/*.docx
+
+# ZIP archives
+*.zip
+
+# Claude Code internal
+.claude/
+CLAUDE.md
+CLAUDE-*.md
+
+# Review/proposal artifacts
+AUTO_REVIEW.md
+CODE_REVIEW.md
+REVISED_PROPOSAL.md
+REVIEW_STATE.json
+
+# Template directory
+RAGCACHE_template/
+
+# Redundant older result files
+benchmark_local_results.json
+benchmark_results_v3.json
+benchmark_results_v4.json

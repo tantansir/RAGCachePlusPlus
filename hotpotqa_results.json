@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-03-17 16:56:36",
+  "config": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "num_examples": 80,
+    "dataset": "hotpot_qa/fullwiki/validation"
+  },
+  "workload": {
+    "avg_consecutive_overlap": 0.0
+  },
+  "results": {
+    "no_cache": {
+      "strategy": "no_cache",
+      "n": 77,
+      "em": 0.0,
+      "f1": 0.0501,
+      "ttft_p50_ms": 1494.94,
+      "ttft_mean_ms": 1503.46
+    },
+    "apc_retrieval": {
+      "strategy": "apc_retrieval",
+      "n": 77,
+      "em": 0.0,
+      "f1": 0.0467,
+      "ttft_p50_ms": 1383.82,
+      "ttft_mean_ms": 1427.85
+    },
+    "apc_random": {
+      "strategy": "apc_random",
+      "n": 77,
+      "em": 0.0,
+      "f1": 0.046,
+      "ttft_p50_ms": 1346.74,
+      "ttft_mean_ms": 1345.54
+    },
+    "apc_sorted": {
+      "strategy": "apc_sorted",
+      "n": 77,
+      "em": 0.0,
+      "f1": 0.0479,
+      "ttft_p50_ms": 1380.08,
+      "ttft_mean_ms": 1407.84
+    },
+    "apc_optimized": {
+      "strategy": "apc_optimized",
+      "n": 77,
+      "em": 0.0,
+      "f1": 0.0467,
+      "ttft_p50_ms": 1239.09,
+      "ttft_mean_ms": 1240.96
+    }
+  }
+}

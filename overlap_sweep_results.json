@@ -1,0 +1,37 @@
+{
+  "overlap_0.0": {
+    "overlap_fraction": 0.0,
+    "actual_jaccard": 0.386,
+    "retrieval_ttft_p50": 126.76,
+    "optimized_ttft_p50": 111.65,
+    "improvement_pct": 11.9
+  },
+  "overlap_0.2": {
+    "overlap_fraction": 0.2,
+    "actual_jaccard": 0.386,
+    "retrieval_ttft_p50": 128.94,
+    "optimized_ttft_p50": 114.17,
+    "improvement_pct": 11.5
+  },
+  "overlap_0.4": {
+    "overlap_fraction": 0.4,
+    "actual_jaccard": 0.417,
+    "retrieval_ttft_p50": 111.14,
+    "optimized_ttft_p50": 77.78,
+    "improvement_pct": 30.0
+  },
+  "overlap_0.6": {
+    "overlap_fraction": 0.6,
+    "actual_jaccard": 0.526,
+    "retrieval_ttft_p50": 75.49,
+    "optimized_ttft_p50": 60.48,
+    "improvement_pct": 19.9
+  },
+  "overlap_0.8": {
+    "overlap_fraction": 0.8,
+    "actual_jaccard": 0.661,
+    "retrieval_ttft_p50": 50.35,
+    "optimized_ttft_p50": 50.77,
+    "improvement_pct": -0.8
+  }
+}

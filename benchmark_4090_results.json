@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-03-18 20:56:27",
+  "config": {
+    "model_name": "Qwen/Qwen2.5-7B-Instruct",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "gpu_memory_utilization": 0.9,
+    "max_model_len": 4096
+  },
+  "workload": {
+    "avg_consecutive_overlap": 0.52
+  },
+  "results": {
+    "no_cache": {
+      "strategy": "no_cache",
+      "n": 195,
+      "ttft_p50_ms": 121.28,
+      "ttft_p95_ms": 123.67,
+      "ttft_p99_ms": 125.06,
+      "ttft_mean_ms": 121.43,
+      "total_p50_ms": 121.28,
+      "total_p95_ms": 123.67,
+      "avg_prompt_tokens": 1100.5,
+      "prefix_hit_rate": 0.0
+    },
+    "apc_retrieval": {
+      "strategy": "apc_retrieval",
+      "n": 195,
+      "ttft_p50_ms": 59.64,
+      "ttft_p95_ms": 117.36,
+      "ttft_p99_ms": 119.31,
+      "ttft_mean_ms": 55.85,
+      "total_p50_ms": 59.64,
+      "total_p95_ms": 117.36,
+      "avg_prompt_tokens": 1100.5,
+      "prefix_hit_rate": 0.123
+    },
+    "apc_optimized": {
+      "strategy": "apc_optimized",
+      "n": 195,
+      "ttft_p50_ms": 40.13,
+      "ttft_p95_ms": 117.4,
+      "ttft_p99_ms": 119.89,
+      "ttft_mean_ms": 51.38,
+      "total_p50_ms": 40.13,
+      "total_p95_ms": 117.4,
+      "avg_prompt_tokens": 1100.5,
+      "prefix_hit_rate": 0.19
+    },
+    "apc_sorted": {
+      "strategy": "apc_sorted",
+      "n": 195,
+      "ttft_p50_ms": 81.22,
+      "ttft_p95_ms": 118.73,
+      "ttft_p99_ms": 120.41,
+      "ttft_mean_ms": 76.34,
+      "total_p50_ms": 81.22,
+      "total_p95_ms": 118.73,
+      "avg_prompt_tokens": 1100.5,
+      "prefix_hit_rate": 0.256
+    }
+  }
+}

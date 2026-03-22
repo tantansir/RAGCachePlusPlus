@@ -1,0 +1,423 @@
+{
+  "config": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "overlap": 0.6
+  },
+  "timestamp": "2026-03-19 03:57:04",
+  "concurrent": {
+    "no_cache": {
+      "1": {
+        "batch_size": 1,
+        "num_batches": 198,
+        "avg_per_request_ms": 114.72,
+        "p50_per_request_ms": 114.89,
+        "p95_per_request_ms": 117.35,
+        "batch_wall_p50_ms": 114.89,
+        "throughput_req_s": 8.72
+      },
+      "2": {
+        "batch_size": 2,
+        "num_batches": 98,
+        "avg_per_request_ms": 110.47,
+        "p50_per_request_ms": 110.36,
+        "p95_per_request_ms": 112.37,
+        "batch_wall_p50_ms": 220.71,
+        "throughput_req_s": 9.05
+      },
+      "4": {
+        "batch_size": 4,
+        "num_batches": 48,
+        "avg_per_request_ms": 103.43,
+        "p50_per_request_ms": 103.47,
+        "p95_per_request_ms": 104.89,
+        "batch_wall_p50_ms": 413.89,
+        "throughput_req_s": 9.67
+      },
+      "8": {
+        "batch_size": 8,
+        "num_batches": 23,
+        "avg_per_request_ms": 100.89,
+        "p50_per_request_ms": 101.0,
+        "p95_per_request_ms": 101.84,
+        "batch_wall_p50_ms": 808.01,
+        "throughput_req_s": 9.91
+      }
+    },
+    "apc_retrieval": {
+      "1": {
+        "batch_size": 1,
+        "num_batches": 198,
+        "avg_per_request_ms": 54.74,
+        "p50_per_request_ms": 57.78,
+        "p95_per_request_ms": 112.6,
+        "batch_wall_p50_ms": 57.78,
+        "throughput_req_s": 18.27
+      },
+      "2": {
+        "batch_size": 2,
+        "num_batches": 98,
+        "avg_per_request_ms": 48.04,
+        "p50_per_request_ms": 43.13,
+        "p95_per_request_ms": 80.53,
+        "batch_wall_p50_ms": 86.25,
+        "throughput_req_s": 20.82
+      },
+      "4": {
+        "batch_size": 4,
+        "num_batches": 48,
+        "avg_per_request_ms": 41.61,
+        "p50_per_request_ms": 41.66,
+        "p95_per_request_ms": 59.9,
+        "batch_wall_p50_ms": 166.63,
+        "throughput_req_s": 24.03
+      },
+      "8": {
+        "batch_size": 8,
+        "num_batches": 23,
+        "avg_per_request_ms": 38.31,
+        "p50_per_request_ms": 38.87,
+        "p95_per_request_ms": 44.64,
+        "batch_wall_p50_ms": 310.98,
+        "throughput_req_s": 26.1
+      }
+    },
+    "apc_optimized": {
+      "1": {
+        "batch_size": 1,
+        "num_batches": 198,
+        "avg_per_request_ms": 50.73,
+        "p50_per_request_ms": 40.21,
+        "p95_per_request_ms": 112.49,
+        "batch_wall_p50_ms": 40.21,
+        "throughput_req_s": 19.71
+      },
+      "2": {
+        "batch_size": 2,
+        "num_batches": 98,
+        "avg_per_request_ms": 44.28,
+        "p50_per_request_ms": 38.92,
+        "p95_per_request_ms": 79.65,
+        "batch_wall_p50_ms": 77.84,
+        "throughput_req_s": 22.59
+      },
+      "4": {
+        "batch_size": 4,
+        "num_batches": 48,
+        "avg_per_request_ms": 37.48,
+        "p50_per_request_ms": 36.42,
+        "p95_per_request_ms": 58.5,
+        "batch_wall_p50_ms": 145.67,
+        "throughput_req_s": 26.68
+      },
+      "8": {
+        "batch_size": 8,
+        "num_batches": 23,
+        "avg_per_request_ms": 35.68,
+        "p50_per_request_ms": 36.68,
+        "p95_per_request_ms": 43.17,
+        "batch_wall_p50_ms": 293.47,
+        "throughput_req_s": 28.02
+      }
+    },
+    "improvements": {
+      "1": 7.3,
+      "2": 7.8,
+      "4": 9.9,
+      "8": 6.9
+    }
+  },
+  "baselines": {
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 116.89,
+      "p95_ms": 119.54,
+      "p99_ms": 120.91,
+      "mean_ms": 116.76,
+      "std_ms": 1.74
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 56.83,
+      "p95_ms": 112.68,
+      "p99_ms": 113.96,
+      "mean_ms": 54.08,
+      "std_ms": 22.66
+    },
+    "apc_sorted": {
+      "n": 195,
+      "p50_ms": 77.93,
+      "p95_ms": 113.64,
+      "p99_ms": 115.63,
+      "mean_ms": 74.02,
+      "std_ms": 30.76
+    },
+    "apc_recency": {
+      "n": 195,
+      "p50_ms": 55.33,
+      "p95_ms": 111.86,
+      "p99_ms": 113.9,
+      "mean_ms": 52.78,
+      "std_ms": 22.72
+    },
+    "apc_oracle": {
+      "n": 195,
+      "p50_ms": 39.96,
+      "p95_ms": 112.51,
+      "p99_ms": 114.13,
+      "mean_ms": 49.97,
+      "std_ms": 23.81
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 40.97,
+      "p95_ms": 112.75,
+      "p99_ms": 114.55,
+      "mean_ms": 51.16,
+      "std_ms": 23.44
+    },
+    "improvements_vs_retrieval": {
+      "no_cache": -105.7,
+      "apc_sorted": -37.1,
+      "apc_recency": 2.6,
+      "apc_oracle": 29.7,
+      "apc_optimized": 27.9
+    }
+  },
+  "multi_seed": {
+    "no_cache": {
+      "per_seed": [
+        {
+          "n": 195,
+          "p50_ms": 117.27,
+          "p95_ms": 119.46,
+          "p99_ms": 121.58,
+          "mean_ms": 117.28,
+          "std_ms": 1.38
+        },
+        {
+          "n": 195,
+          "p50_ms": 115.71,
+          "p95_ms": 119.03,
+          "p99_ms": 120.73,
+          "mean_ms": 115.83,
+          "std_ms": 1.64
+        },
+        {
+          "n": 195,
+          "p50_ms": 116.62,
+          "p95_ms": 118.68,
+          "p99_ms": 119.85,
+          "mean_ms": 116.63,
+          "std_ms": 1.14
+        }
+      ],
+      "p50_mean": 116.53,
+      "p50_std": 0.78,
+      "p50_ci95": 1.95,
+      "mean_mean": 116.58,
+      "mean_std": 0.73,
+      "mean_ci95": 1.8
+    },
+    "apc_retrieval": {
+      "per_seed": [
+        {
+          "n": 195,
+          "p50_ms": 57.71,
+          "p95_ms": 112.43,
+          "p99_ms": 113.96,
+          "mean_ms": 54.73,
+          "std_ms": 22.37
+        },
+        {
+          "n": 195,
+          "p50_ms": 56.6,
+          "p95_ms": 111.92,
+          "p99_ms": 114.2,
+          "mean_ms": 54.25,
+          "std_ms": 22.19
+        },
+        {
+          "n": 195,
+          "p50_ms": 56.19,
+          "p95_ms": 111.57,
+          "p99_ms": 114.17,
+          "mean_ms": 53.27,
+          "std_ms": 22.52
+        }
+      ],
+      "p50_mean": 56.83,
+      "p50_std": 0.79,
+      "p50_ci95": 1.95,
+      "mean_mean": 54.08,
+      "mean_std": 0.74,
+      "mean_ci95": 1.85
+    },
+    "apc_optimized": {
+      "per_seed": [
+        {
+          "n": 195,
+          "p50_ms": 40.15,
+          "p95_ms": 111.72,
+          "p99_ms": 113.38,
+          "mean_ms": 50.45,
+          "std_ms": 23.39
+        },
+        {
+          "n": 195,
+          "p50_ms": 40.21,
+          "p95_ms": 112.47,
+          "p99_ms": 114.0,
+          "mean_ms": 51.15,
+          "std_ms": 23.15
+        },
+        {
+          "n": 195,
+          "p50_ms": 39.72,
+          "p95_ms": 112.53,
+          "p99_ms": 114.11,
+          "mean_ms": 49.71,
+          "std_ms": 23.75
+        }
+      ],
+      "p50_mean": 40.03,
+      "p50_std": 0.27,
+      "p50_ci95": 0.66,
+      "mean_mean": 50.44,
+      "mean_std": 0.72,
+      "mean_ci95": 1.79
+    },
+    "improvement": {
+      "diff_mean_ms": 16.81,
+      "diff_std_ms": 0.65,
+      "diff_ci95_ms": 1.62,
+      "pct_improvement": 29.6,
+      "significant": true
+    }
+  },
+  "eviction": {
+    "0.78": {
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 56.78,
+        "p95_ms": 112.09,
+        "p99_ms": 114.43,
+        "mean_ms": 54.39,
+        "std_ms": 22.35
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 39.92,
+        "p95_ms": 111.36,
+        "p99_ms": 113.31,
+        "mean_ms": 50.19,
+        "std_ms": 23.67
+      },
+      "improvement_pct": 29.7
+    },
+    "0.82": {
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 57.66,
+        "p95_ms": 112.9,
+        "p99_ms": 114.65,
+        "mean_ms": 54.86,
+        "std_ms": 22.41
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 40.08,
+        "p95_ms": 111.29,
+        "p99_ms": 113.41,
+        "mean_ms": 50.38,
+        "std_ms": 23.3
+      },
+      "improvement_pct": 30.5
+    },
+    "0.86": {
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 57.48,
+        "p95_ms": 112.06,
+        "p99_ms": 113.37,
+        "mean_ms": 54.22,
+        "std_ms": 22.49
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 40.71,
+        "p95_ms": 112.71,
+        "p99_ms": 114.32,
+        "mean_ms": 51.02,
+        "std_ms": 23.44
+      },
+      "improvement_pct": 29.2
+    },
+    "0.9": {
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 57.18,
+        "p95_ms": 112.5,
+        "p99_ms": 114.95,
+        "mean_ms": 54.44,
+        "std_ms": 22.54
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 39.72,
+        "p95_ms": 111.25,
+        "p99_ms": 113.99,
+        "mean_ms": 50.12,
+        "std_ms": 23.59
+      },
+      "improvement_pct": 30.5
+    }
+  },
+  "overlap_debug": {
+    "standard_overlap_0": {
+      "jaccard": 0.3606,
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 93.14,
+        "p95_ms": 112.91,
+        "p99_ms": 114.31,
+        "mean_ms": 88.51,
+        "std_ms": 12.91
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 78.19,
+        "p95_ms": 112.98,
+        "p99_ms": 114.73,
+        "mean_ms": 76.18,
+        "std_ms": 21.78
+      },
+      "improvement_pct": 16.1
+    },
+    "true_zero_overlap": {
+      "jaccard": 0.0,
+      "apc_retrieval": {
+        "n": 195,
+        "p50_ms": 113.7,
+        "p95_ms": 115.93,
+        "p99_ms": 118.38,
+        "mean_ms": 111.46,
+        "std_ms": 7.58
+      },
+      "apc_optimized": {
+        "n": 195,
+        "p50_ms": 111.16,
+        "p95_ms": 114.1,
+        "p99_ms": 115.32,
+        "mean_ms": 100.14,
+        "std_ms": 18.51
+      },
+      "improvement_pct": 2.2
+    },
+    "finding": "The 'overlap=0.0' setting in generate_rag_trace still forces max(1, int(k * overlap)) = 1 shared doc plus region-burst sampling, resulting in Jaccard > 0. True zero overlap (different regions per query) shows the genuine baseline."
+  }
+}

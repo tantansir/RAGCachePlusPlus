@@ -1,0 +1,236 @@
+{
+  "config": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "max_model_len": 4096,
+    "gpu_mem": 0.9
+  },
+  "timestamp": "2026-03-19 03:08:33",
+  "throughput": {
+    "no_cache": {
+      "sequential": {
+        "elapsed_s": 181.09,
+        "requests_per_sec": 1.1,
+        "input_tokens_per_sec": 1215.0,
+        "output_tokens_per_sec": 55.0,
+        "total_tokens_per_sec": 1270.0
+      },
+      "batched": {
+        "elapsed_s": 25.38,
+        "requests_per_sec": 7.88,
+        "input_tokens_per_sec": 8670.0,
+        "output_tokens_per_sec": 394.0,
+        "total_tokens_per_sec": 9064.0
+      }
+    },
+    "apc_retrieval": {
+      "sequential": {
+        "elapsed_s": 167.94,
+        "requests_per_sec": 1.19,
+        "input_tokens_per_sec": 1310.0,
+        "output_tokens_per_sec": 60.0,
+        "total_tokens_per_sec": 1370.0
+      },
+      "batched": {
+        "elapsed_s": 2.44,
+        "requests_per_sec": 82.05,
+        "input_tokens_per_sec": 90280.0,
+        "output_tokens_per_sec": 4103.0,
+        "total_tokens_per_sec": 94382.0
+      }
+    },
+    "apc_optimized": {
+      "sequential": {
+        "elapsed_s": 167.84,
+        "requests_per_sec": 1.19,
+        "input_tokens_per_sec": 1311.0,
+        "output_tokens_per_sec": 60.0,
+        "total_tokens_per_sec": 1371.0
+      },
+      "batched": {
+        "elapsed_s": 2.45,
+        "requests_per_sec": 81.75,
+        "input_tokens_per_sec": 89942.0,
+        "output_tokens_per_sec": 4087.0,
+        "total_tokens_per_sec": 94029.0
+      }
+    }
+  },
+  "memory": {
+    "no_cache": {
+      "before_load_mb": 0,
+      "after_load_mb": 21751,
+      "after_warmup_mb": 21751,
+      "model_mb": 21751,
+      "cache_delta_mb": 0,
+      "total_gpu_mb": 24564
+    },
+    "apc_retrieval": {
+      "before_load_mb": 0,
+      "after_load_mb": 21751,
+      "after_warmup_mb": 21751,
+      "model_mb": 21751,
+      "cache_delta_mb": 0,
+      "total_gpu_mb": 24564
+    },
+    "apc_optimized": {
+      "before_load_mb": 0,
+      "after_load_mb": 21751,
+      "after_warmup_mb": 21751,
+      "model_mb": 21751,
+      "cache_delta_mb": 0,
+      "total_gpu_mb": 24564
+    }
+  },
+  "profiling": {
+    "apc_retrieval": {
+      "ordering_mean_us": 4.0,
+      "ordering_p50_us": 3.2,
+      "ordering_max_us": 20.6,
+      "build_mean_us": 36.3,
+      "build_p50_us": 28.9,
+      "generate_mean_ms": 55.47,
+      "generate_p50_ms": 58.56,
+      "total_mean_ms": 55.51,
+      "total_p50_ms": 58.59,
+      "overhead_pct": 0.073
+    },
+    "apc_optimized": {
+      "ordering_mean_us": 22.2,
+      "ordering_p50_us": 18.4,
+      "ordering_max_us": 53.9,
+      "build_mean_us": 44.4,
+      "build_p50_us": 37.7,
+      "generate_mean_ms": 52.5,
+      "generate_p50_ms": 41.43,
+      "total_mean_ms": 52.57,
+      "total_p50_ms": 41.54,
+      "overhead_pct": 0.127
+    }
+  },
+  "pipelining": {
+    "t_cold_ms": 147.82,
+    "t_warm_ms": 60.6,
+    "t_system_prefill_ms": 87.22,
+    "t_system_only_ms": 84.48,
+    "retrieval_delays": {
+      "0": {
+        "retrieval_delay_ms": 0,
+        "serial_ttft_ms": 147.8,
+        "pipelined_ttft_ms": 147.8,
+        "savings_ms": 0.0,
+        "savings_pct": 0.0
+      },
+      "10": {
+        "retrieval_delay_ms": 10,
+        "serial_ttft_ms": 157.8,
+        "pipelined_ttft_ms": 147.8,
+        "savings_ms": 10.0,
+        "savings_pct": 6.3
+      },
+      "20": {
+        "retrieval_delay_ms": 20,
+        "serial_ttft_ms": 167.8,
+        "pipelined_ttft_ms": 147.8,
+        "savings_ms": 20.0,
+        "savings_pct": 11.9
+      },
+      "50": {
+        "retrieval_delay_ms": 50,
+        "serial_ttft_ms": 197.8,
+        "pipelined_ttft_ms": 147.8,
+        "savings_ms": 50.0,
+        "savings_pct": 25.3
+      },
+      "100": {
+        "retrieval_delay_ms": 100,
+        "serial_ttft_ms": 247.8,
+        "pipelined_ttft_ms": 160.6,
+        "savings_ms": 87.2,
+        "savings_pct": 35.2
+      },
+      "200": {
+        "retrieval_delay_ms": 200,
+        "serial_ttft_ms": 347.8,
+        "pipelined_ttft_ms": 260.6,
+        "savings_ms": 87.2,
+        "savings_pct": 25.1
+      }
+    }
+  },
+  "spatial": {
+    "jaccard_mean": 0.1703,
+    "strategies": {
+      "no_cache": {
+        "ttft_p50_ms": 110.28,
+        "ttft_p95_ms": 113.12,
+        "ttft_mean_ms": 109.5
+      },
+      "apc_retrieval": {
+        "ttft_p50_ms": 96.54,
+        "ttft_p95_ms": 103.09,
+        "ttft_mean_ms": 96.13
+      },
+      "apc_optimized": {
+        "ttft_p50_ms": 92.23,
+        "ttft_p95_ms": 102.96,
+        "ttft_mean_ms": 85.69
+      }
+    },
+    "improvement_opt_vs_retr_pct": 4.5,
+    "improvement_opt_vs_nocache_pct": 16.4
+  },
+  "cache_efficiency": {
+    "baseline_p50_ms": 116.09,
+    "apc_retrieval": {
+      "ttft_p50_ms": 57.91,
+      "prefill_saved_mean": 0.5283,
+      "prefill_saved_p50": 0.5012,
+      "prefill_saved_p95": 0.7561,
+      "requests_with_savings": 176,
+      "requests_total": 195
+    },
+    "apc_optimized": {
+      "ttft_p50_ms": 39.12,
+      "prefill_saved_mean": 0.5757,
+      "prefill_saved_p50": 0.663,
+      "prefill_saved_p95": 0.7773,
+      "requests_with_savings": 185,
+      "requests_total": 195
+    }
+  },
+  "pipelining_e2e": {
+    "20": {
+      "retrieval_delay_ms": 20,
+      "serial_wall_ms": 76.8,
+      "pipelined_wall_ms": 50.4,
+      "savings_ms": 26.3,
+      "savings_pct": 34.3
+    },
+    "50": {
+      "retrieval_delay_ms": 50,
+      "serial_wall_ms": 106.8,
+      "pipelined_wall_ms": 78.8,
+      "savings_ms": 27.9,
+      "savings_pct": 26.2
+    },
+    "100": {
+      "retrieval_delay_ms": 100,
+      "serial_wall_ms": 156.8,
+      "pipelined_wall_ms": 128.8,
+      "savings_ms": 27.9,
+      "savings_pct": 17.8
+    },
+    "component_measurements": {
+      "t_cold_p50_ms": 56.75,
+      "t_warm_p50_ms": 28.23,
+      "t_sys_ms": 21.58,
+      "t_warmed_p50_ms": 28.84,
+      "cold_samples": 10,
+      "warm_samples": 10,
+      "warmed_samples": 10
+    }
+  }
+}

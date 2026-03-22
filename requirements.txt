@@ -1,0 +1,10 @@
+# RAGCache++ dependencies
+# Core (simulation mode - no GPU needed)
+# All stdlib - no external packages required
+
+# GPU mode (vLLM integration - uncomment when ready)
+# vllm>=0.6.0
+# torch>=2.4.0
+# transformers>=4.44.0
+# datasets>=3.0.0
+# numpy>=1.26.0
