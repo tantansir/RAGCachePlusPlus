@@ -1,0 +1,466 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true,
+    "dtype": "auto"
+  },
+  "timestamp": "2026-04-05 05:08:14",
+  "quality_strict": {
+    "num_examples": 100,
+    "corpus_size": 500,
+    "top_k": 5,
+    "system_prompt": "You are a factoid QA system. Output ONLY the answer itself. No explanation, no full sentences. Just the answer.",
+    "max_tokens": 16,
+    "apc_retrieval": {
+      "n": 97,
+      "strict_em": 1.0,
+      "strict_em_ci95": [
+        1.0,
+        1.0
+      ],
+      "contains_em": 1.0,
+      "contains_em_ci95": [
+        1.0,
+        1.0
+      ],
+      "f1": 1.0,
+      "f1_ci95": [
+        1.0,
+        1.0
+      ],
+      "ttft_p50_ms": 79.04,
+      "ttft_mean_ms": 90.7,
+      "sample_predictions": [
+        {
+          "q": "What is the capital of France?",
+          "gold": "Paris",
+          "pred": "Paris",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the largest planet in the solar system?",
+          "gold": "Jupiter",
+          "pred": "Jupiter",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the chemical symbol for water?",
+          "gold": "H2O",
+          "pred": "H2O",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the year the Berlin Wall fell?",
+          "gold": "1989",
+          "pred": "1989",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the author of Romeo and Juliet?",
+          "gold": "William Shakespeare",
+          "pred": "William Shakespeare",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the smallest country by area?",
+          "gold": "Vatican City",
+          "pred": "Vatican City",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the element with atomic number 79?",
+          "gold": "gold",
+          "pred": "gold",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the longest river in the world?",
+          "gold": "Nile",
+          "pred": "Nile",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the first person to walk on the Moon?",
+          "gold": "Neil Armstrong",
+          "pred": "Neil Armstrong",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the speed of light in meters per second?",
+          "gold": "299792458",
+          "pred": "299792458",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "apc_optimized": {
+      "n": 97,
+      "strict_em": 1.0,
+      "strict_em_ci95": [
+        1.0,
+        1.0
+      ],
+      "contains_em": 1.0,
+      "contains_em_ci95": [
+        1.0,
+        1.0
+      ],
+      "f1": 1.0,
+      "f1_ci95": [
+        1.0,
+        1.0
+      ],
+      "ttft_p50_ms": 79.87,
+      "ttft_mean_ms": 91.28,
+      "sample_predictions": [
+        {
+          "q": "What is the capital of France?",
+          "gold": "Paris",
+          "pred": "Paris",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the largest planet in the solar system?",
+          "gold": "Jupiter",
+          "pred": "Jupiter",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the chemical symbol for water?",
+          "gold": "H2O",
+          "pred": "H2O",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the year the Berlin Wall fell?",
+          "gold": "1989",
+          "pred": "1989",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the author of Romeo and Juliet?",
+          "gold": "William Shakespeare",
+          "pred": "William Shakespeare",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the smallest country by area?",
+          "gold": "Vatican City",
+          "pred": "Vatican City",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the element with atomic number 79?",
+          "gold": "gold",
+          "pred": "gold",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the longest river in the world?",
+          "gold": "Nile",
+          "pred": "Nile",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the first person to walk on the Moon?",
+          "gold": "Neil Armstrong",
+          "pred": "Neil Armstrong",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What is the speed of light in meters per second?",
+          "gold": "299792458",
+          "pred": "299792458",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "quality_delta": {
+      "strict_em_diff": 0.0,
+      "contains_em_diff": 0.0,
+      "f1_diff": 0.0,
+      "quality_preserved": true
+    },
+    "key_finding": "Strict EM: retr=1.0000, opt=1.0000. Contains EM: retr=1.0000, opt=1.0000. Strict extractive prompt with max_tokens=16 yields nonzero EM. Document reordering does not degrade answer quality."
+  },
+  "cross_arch": {
+    "model": "/root/autodl-fs/models/models--microsoft--Phi-3-mini-4k-instruct/snapshots/f39ac1d28e925b323eae81227eaba4464caced4e",
+    "architecture": "Phi-3-mini-4k",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6,
+      "avg_jaccard": 0.52
+    },
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 85.77,
+      "p95_ms": 88.34,
+      "p99_ms": 89.88,
+      "mean_ms": 85.95,
+      "std_ms": 1.36
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 43.39,
+      "p95_ms": 84.8,
+      "p99_ms": 86.73,
+      "mean_ms": 44.51,
+      "std_ms": 15.6
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 35.46,
+      "p95_ms": 85.51,
+      "p99_ms": 86.67,
+      "mean_ms": 41.44,
+      "std_ms": 16.7
+    },
+    "improvements": {
+      "optimized_vs_nocache_p50_pct": 58.7,
+      "optimized_vs_nocache_p95_pct": 3.2,
+      "optimized_vs_nocache_mean_pct": 51.8,
+      "optimized_vs_retrieval_p50_pct": 18.3,
+      "optimized_vs_retrieval_p95_pct": -0.8,
+      "optimized_vs_retrieval_mean_pct": 6.9
+    },
+    "key_finding": "Phi-3-mini-4k: trie-based ordering generalizes across architectures. p50 vs no_cache: 58.7%, vs retrieval: 18.3%."
+  },
+  "optimality_gap": {
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6,
+      "k_factorial": 120
+    },
+    "overall": {
+      "n": 200,
+      "mean_ratio": 0.997,
+      "min_ratio": 0.8,
+      "max_ratio": 1.0,
+      "fraction_optimal": 0.985,
+      "optimal_count": 197
+    },
+    "same_region": {
+      "n": 180,
+      "mean_ratio": 0.9967,
+      "min_ratio": 0.8,
+      "fraction_optimal": 0.9833
+    },
+    "new_region": {
+      "n": 19,
+      "mean_ratio": 1.0,
+      "min_ratio": 1.0,
+      "fraction_optimal": 1.0
+    },
+    "sample_details": [
+      {
+        "query_idx": 0,
+        "region": 0,
+        "greedy_len": 0,
+        "oracle_len": 0,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 1,
+        "region": 0,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 2,
+        "region": 0,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 3,
+        "region": 0,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 4,
+        "region": 0,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 5,
+        "region": 0,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 6,
+        "region": 0,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 7,
+        "region": 0,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 8,
+        "region": 0,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 9,
+        "region": 0,
+        "greedy_len": 5,
+        "oracle_len": 5,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 10,
+        "region": 1,
+        "greedy_len": 0,
+        "oracle_len": 0,
+        "ratio": 1.0,
+        "is_new_region": true
+      },
+      {
+        "query_idx": 11,
+        "region": 1,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 12,
+        "region": 1,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 13,
+        "region": 1,
+        "greedy_len": 5,
+        "oracle_len": 5,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 14,
+        "region": 1,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 15,
+        "region": 1,
+        "greedy_len": 4,
+        "oracle_len": 4,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 16,
+        "region": 1,
+        "greedy_len": 5,
+        "oracle_len": 5,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 17,
+        "region": 1,
+        "greedy_len": 5,
+        "oracle_len": 5,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 18,
+        "region": 1,
+        "greedy_len": 5,
+        "oracle_len": 5,
+        "ratio": 1.0,
+        "is_new_region": false
+      },
+      {
+        "query_idx": 19,
+        "region": 1,
+        "greedy_len": 3,
+        "oracle_len": 3,
+        "ratio": 1.0,
+        "is_new_region": false
+      }
+    ],
+    "key_finding": "Greedy achieves 0.9970 mean optimality ratio (1.0 = perfect). 98.5% of queries are solved optimally. Min ratio = 0.8000. The greedy trie walk is a near-optimal approximation for k=5."
+  }
+}
