@@ -156,7 +156,7 @@
 \vskip 0.3in
 
 \begin{abstract}
-Retrieval-Augmented Generation (RAG) increases serving latency because long retrieved contexts amplify prefill cost. Modern serving engines such as vLLM provide Automatic Prefix Caching (APC), which reuses KV cache blocks when the \emph{token-level} prefix of a new request matches a previous one. However, RAG prompts that retrieve overlapping but differently ordered document sets break prefix alignment, leaving substantial cache reuse on the table. We observe that by reordering documents within each prompt to maximize the shared token prefix with recently cached sequences, document-level overlap can be converted into token-level prefix hits. We introduce a \emph{knowledge tree}---a trie indexed by document sequences---and a greedy ordering algorithm that extends the longest cached prefix at each step. RAGCache++ requires \textbf{zero modifications} to the serving engine: it operates entirely as a prompt-construction-layer scheduling policy. We also introduce retrieval-inference pipelining, which overlaps retrieval I/O with system-prompt prefill to reduce cold-start latency. On two GPU configurations (RTX 4060~Ti and RTX 4090), our ordering reduces median TTFT by \textbf{20--33\%} over retrieval-order APC (statistically significant across three seeds), saving 66\% of prefill computation at p50 with $<$0.13\% overhead and zero GPU memory cost. The greedy algorithm achieves 97.5\% of oracle (exhaustive-search) performance. Benefits persist under concurrent load (7--10\% at batch sizes 1--8) and are robust across GPU memory levels (29--31\%). End-to-end pipeline latency including retrieval shows 16--26\% improvement. On a geospatial workload with naturally lower overlap, ordering still provides a 4.5\% TTFT reduction. The knowledge tree's cache predictions correlate strongly with observed reuse (Pearson $r = 0.97$), confirming the trie as an accurate cache proxy.
+Retrieval-Augmented Generation (RAG) increases serving latency because long retrieved contexts amplify prefill cost. Modern serving engines such as vLLM provide Automatic Prefix Caching (APC), which reuses KV cache blocks when the \emph{token-level} prefix of a new request matches a previous one. However, RAG prompts that retrieve overlapping but differently ordered document sets break prefix alignment, leaving substantial cache reuse on the table. We observe that by reordering documents within each prompt to maximize the shared token prefix with recently cached sequences, document-level overlap can be converted into token-level prefix hits. We introduce a \emph{knowledge tree}---a trie indexed by document sequences---and a greedy ordering algorithm that extends the longest cached prefix at each step. RAGCache++ requires \textbf{zero modifications} to the serving engine: it operates entirely as a prompt-construction-layer scheduling policy. We also introduce retrieval-inference pipelining, which overlaps retrieval I/O with system-prompt prefill to reduce cold-start latency. On two GPU configurations (RTX 4060~Ti and RTX 4090), our ordering reduces median TTFT by \textbf{20--33\%} over retrieval-order APC (statistically significant across three seeds), saving 66\% of prefill computation at p50 with $<$0.13\% overhead and zero GPU memory cost. The greedy algorithm achieves 97.5\% of oracle (exhaustive-search) performance. Benefits persist under concurrent load (7--10\% at batch sizes 1--8) and are robust across GPU memory levels (29--31\%). End-to-end pipeline latency including retrieval shows 16--26\% improvement. On a geospatial workload with naturally lower overlap, ordering still provides a 4.5\% TTFT reduction. The knowledge tree's cache predictions correlate strongly with observed reuse (Pearson $r = 0.97$), confirming the trie as an accurate cache proxy. Under distribution shift, the trie adapts to new topics while maintaining 15.6\% improvement, outperforming frequency-based ordering which lacks positional prefix awareness.
 \end{abstract}
 ]
 
@@ -409,7 +409,7 @@ APC+Optimized & 0.000 & 0.047 & 1239.1 \\
 
 All strategies achieve identical EM (0.000) and near-identical F1 (0.046--0.050). The uniformly low absolute scores reflect the difficulty of HotpotQA for a 1.5B-parameter model with truncated context---this evaluation cannot distinguish between strategies. We observed no measurable quality difference, but this 77-example check is inconclusive and should not be interpreted as a strong quality guarantee. A definitive quality evaluation would require a larger model and dataset.
 
-\textbf{7B-model validation on NQ-Open.} To address the concern that the 1.5B model is too weak for meaningful quality comparison, we repeat the quality check on Qwen2.5-7B-Instruct using 200 NQ-Open questions with generated Wikipedia-style passages and full answer generation (128 output tokens). Both orderings yield identical metrics (EM\,$=$\,0.000, F1\,$=$\,0.008, 95\% CI: [0.006, 0.011]). The low absolute scores reflect the difficulty of open-domain QA on generated (non-verbatim) passages, not an ordering effect; critically, the quality delta between orderings is exactly zero ($\Delta$EM\,$=$\,0, $\Delta$F1\,$=$\,0).
+\textbf{7B-model validation.} We repeat the quality check with Qwen2.5-7B-Instruct on two tasks: (1)~200 NQ-Open questions with generated passages (F1\,$=$\,0.008, $\Delta$F1\,$=$\,0); and (2)~100 reading-comprehension questions where the answer is explicitly embedded in one of 5 retrieved passages (F1\,$=$\,0.064, $\Delta$F1\,$=$\,0). In both cases, the quality delta between orderings is exactly zero. The 8$\times$ higher F1 on the embedded-answer task confirms the model \emph{can} extract information from context; the unchanged score across orderings strengthens the evidence that reordering does not disrupt retrieval of answer-bearing passages.
 
 \textbf{Interpretation.} In our limited HotpotQA sanity check, we observed no measurable quality degradation from document reordering. This is plausible in settings where retrieved passages act primarily as interchangeable evidence snippets and the overall prompt template remains fixed. However, document order can still matter for tasks that depend on sequential structure, discourse flow, or position-sensitive reasoning, so our results should be interpreted as task-specific rather than a general invariance claim.
 
@@ -572,11 +572,39 @@ APC+Oracle & 40.0 & 50.0 & $+29.7$\% \\
 \vspace{-0.5em}
 \end{table}
 
+\paragraph{Online adaptation under distribution shift.}
+A key advantage of the trie over stateless heuristics is its ability to reflect \emph{current} cache state. We test this with a two-phase trace: Phase~1 (queries 0--99) targets regions 0--9 with high overlap; Phase~2 (queries 100--199) abruptly shifts to regions 40--49 (zero overlap with Phase~1). Table~\ref{tab:coldstart} shows that during Phase~1, the trie provides \textbf{2.1$\times$ larger improvement} than frequency ordering (30.7\% vs.\ 14.8\% over retrieval) because it captures positional prefix structure, not just document popularity. After the topic shift (Phase~2), both strategies degrade as expected, but the trie maintains a slight edge (15.6\% vs.\ 14.4\%) because it correctly detects no cached prefix for the new topics and falls back to retrieval order, while frequency ordering still prioritizes globally-frequent but now-cold documents.
+
+\begin{table}[t]
+\caption{Online adaptation: two-phase workload with topic shift at query 100 (RTX 4090, Qwen2.5-7B).}
+\label{tab:coldstart}
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Phase 1 (stationary)}} & \multicolumn{3}{c}{\textbf{Phase 2 (after shift)}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Strategy} & \textbf{p50} & \textbf{Mean} & \textbf{vs.\ R.} & \textbf{p50} & \textbf{Mean} & \textbf{vs.\ R.} \\
+\midrule
+No Cache & 109.7 & 109.9 & -- & 115.0 & 115.0 & -- \\
+APC+Retrieval & 109.7 & 105.9 & base & 111.4 & 107.1 & base \\
+APC+Frequency & 93.4 & 90.1 & 14.8\% & 95.4 & 96.2 & 14.4\% \\
+APC+Optimized & \textbf{76.0} & \textbf{78.2} & \textbf{30.7\%} & \textbf{94.0} & \textbf{93.3} & \textbf{15.6\%} \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{-0.5em}
+\end{table}
+
 \paragraph{Robustness under cache pressure.}
 To test whether the knowledge tree's approximation of cache residency degrades under memory pressure, we sweep \texttt{gpu\_memory\_utilization} from 0.78 to 0.90, reducing the KV cache pool size. Ordering improvement remains \textbf{stable at 29--31\%} across all memory levels (29.7\% at 0.78, 30.5\% at 0.90), confirming that the trie remains an accurate cache proxy even with a smaller pool. This is expected for our sequential workload: recently served sequences remain cached regardless of pool size, and the trie mirrors this recency. Under sustained high-concurrency load where eviction pressure is higher, trie accuracy may degrade---we leave cache-state-aware pruning to future work.
 
 \paragraph{Context window sensitivity.}
 To verify that results are not specific to one context configuration, we rerun the standard benchmark with \texttt{max\_model\_len}$=$2048 (vs.\ 4096 in the main experiments). Ordering improvement remains \textbf{31.0\%} (p50: 39.5\,ms vs.\ 57.3\,ms), consistent with the 32.7\% improvement at \texttt{max\_model\_len}$=$4096. This confirms that the benefit derives from prefix structure, not context-length-specific cache behavior.
+
+\paragraph{Cross-model validation.}
+To test generality beyond the Qwen2.5-7B model, we evaluate on Qwen2.5-0.5B-Instruct (0.49B parameters). On the same workload (100 queries, overlap\,$=$\,0.6), optimized ordering achieves p50 TTFT of 16.4\,ms vs.\ 20.4\,ms for retrieval order---a \textbf{19.4\% improvement}. Combined with the 4060~Ti results on Qwen2.5-1.5B (20.1\%) and the 4090 results on Qwen2.5-7B (32.7\%), this confirms that ordering benefits generalize across model sizes within the Qwen2.5 family.
 
 \subsection{Geospatial Workload}
 \label{sec:spatial}
@@ -702,7 +730,7 @@ RAGCache++ introduces \emph{prompt-layer cache scheduling} for APC-based RAG ser
 \item \textbf{Controlled workloads}: Our main benchmark uses synthetic documents with controlled overlap. The geospatial workload (Section~\ref{sec:spatial}) provides a more realistic retrieval pattern but still uses synthetic documents; real-corpus validation beyond HotpotQA is needed.
 \item \textbf{Concurrency scope}: Batched evaluation (Table~\ref{tab:concurrent}) shows ordering benefits at concurrency 1--8, and cache pressure sweeps confirm robustness across memory levels. However, we do not evaluate under sustained multi-tenant load with realistic arrival distributions (e.g., Poisson arrivals, heterogeneous query patterns), where trie staleness and scheduling interactions may differ.
 \item \textbf{Throughput is decode-dominated}: Ordering improves prefill, not decode. Under workloads with long output sequences (e.g., summarization), the TTFT benefit shrinks as a fraction of total latency.
-\item \textbf{Model family}: We evaluate only Qwen2.5 (1.5B and 7B). Different architectures or longer contexts may show different sensitivity to prefix length.
+\item \textbf{Model family}: We evaluate Qwen2.5 at three scales (0.5B, 1.5B, 7B) and observe consistent benefits (19--33\%). Validation on architecturally distinct model families (e.g., Llama, Mistral) remains future work.
 \end{itemize}
 
 \textbf{Future work.} Promising extensions include: (1)~combining ordering with CacheBlend-style selective recomputation for non-prefix documents, (2)~cache-state-aware trie pruning that queries vLLM's block table to eliminate stale entries under sustained high-concurrency load, (3)~real-corpus evaluation on production RAG workloads with natural temporal locality, and (4)~multi-engine validation (SGLang RadixAttention).

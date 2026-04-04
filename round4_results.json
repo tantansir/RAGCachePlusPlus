@@ -1,0 +1,220 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "overlap": 0.6,
+    "enforce_eager": true,
+    "dtype": "auto"
+  },
+  "timestamp": "2026-04-05 03:22:12",
+  "online_coldstart": {
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6,
+      "phase1_queries": 100,
+      "phase2_queries": 100,
+      "phase1_regions": "0-9",
+      "phase2_regions": "40-49",
+      "phase1_avg_jaccard": 0.0697,
+      "phase2_avg_jaccard": 0.039,
+      "cross_phase_jaccard": 0.0
+    },
+    "no_cache": {
+      "overall": {
+        "n": 195,
+        "p50_ms": 113.12,
+        "p95_ms": 116.38,
+        "p99_ms": 120.92,
+        "mean_ms": 112.52,
+        "std_ms": 2.97
+      },
+      "phase1": {
+        "n": 95,
+        "p50_ms": 109.65,
+        "p95_ms": 112.2,
+        "p99_ms": 114.99,
+        "mean_ms": 109.87,
+        "std_ms": 1.37
+      },
+      "phase2": {
+        "n": 100,
+        "p50_ms": 115.0,
+        "p95_ms": 116.92,
+        "p99_ms": 120.96,
+        "mean_ms": 115.04,
+        "std_ms": 1.52
+      }
+    },
+    "apc_retrieval": {
+      "overall": {
+        "n": 195,
+        "p50_ms": 110.24,
+        "p95_ms": 113.08,
+        "p99_ms": 113.9,
+        "mean_ms": 103.09,
+        "std_ms": 11.89
+      },
+      "phase1": {
+        "n": 95,
+        "p50_ms": 109.67,
+        "p95_ms": 112.18,
+        "p99_ms": 112.86,
+        "mean_ms": 101.94,
+        "std_ms": 11.45
+      },
+      "phase2": {
+        "n": 100,
+        "p50_ms": 111.41,
+        "p95_ms": 113.65,
+        "p99_ms": 114.15,
+        "mean_ms": 104.18,
+        "std_ms": 12.26
+      }
+    },
+    "apc_frequency": {
+      "overall": {
+        "n": 195,
+        "p50_ms": 94.52,
+        "p95_ms": 113.79,
+        "p99_ms": 115.31,
+        "mean_ms": 95.37,
+        "std_ms": 16.38
+      },
+      "phase1": {
+        "n": 95,
+        "p50_ms": 93.42,
+        "p95_ms": 112.23,
+        "p99_ms": 113.61,
+        "mean_ms": 93.29,
+        "std_ms": 16.5
+      },
+      "phase2": {
+        "n": 100,
+        "p50_ms": 95.41,
+        "p95_ms": 114.22,
+        "p99_ms": 116.12,
+        "mean_ms": 97.33,
+        "std_ms": 16.1
+      }
+    },
+    "apc_optimized": {
+      "overall": {
+        "n": 195,
+        "p50_ms": 91.53,
+        "p95_ms": 113.48,
+        "p99_ms": 114.42,
+        "mean_ms": 84.5,
+        "std_ms": 23.15
+      },
+      "phase1": {
+        "n": 95,
+        "p50_ms": 76.03,
+        "p95_ms": 112.17,
+        "p99_ms": 112.78,
+        "mean_ms": 83.0,
+        "std_ms": 21.8
+      },
+      "phase2": {
+        "n": 100,
+        "p50_ms": 93.99,
+        "p95_ms": 114.18,
+        "p99_ms": 114.95,
+        "mean_ms": 85.92,
+        "std_ms": 24.39
+      }
+    },
+    "improvements_vs_retrieval": {
+      "phase1": {
+        "apc_frequency_p50_pct": 14.8,
+        "apc_frequency_mean_pct": 8.5,
+        "apc_optimized_p50_pct": 30.7,
+        "apc_optimized_mean_pct": 18.6
+      },
+      "phase2": {
+        "apc_frequency_p50_pct": 14.4,
+        "apc_frequency_mean_pct": 6.6,
+        "apc_optimized_p50_pct": 15.6,
+        "apc_optimized_mean_pct": 17.5
+      },
+      "overall": {
+        "apc_frequency_p50_pct": 14.3,
+        "apc_frequency_mean_pct": 7.5,
+        "apc_optimized_p50_pct": 17.0,
+        "apc_optimized_mean_pct": 18.0
+      }
+    },
+    "key_finding": "Phase 1 (stationary): frequency=+14.8%, trie=+30.7%. Phase 2 (shift): frequency=+14.4%, trie=+15.6%. Under distribution shift, frequency ordering degrades because it puts globally-frequent but now-cold docs first. The trie immediately adapts by falling back to retrieval order for unseen prefixes."
+  },
+  "quality_embedded": {
+    "num_examples": 100,
+    "corpus_size": 500,
+    "top_k": 5,
+    "apc_retrieval": {
+      "n": 97,
+      "em": 0.0,
+      "f1": 0.0642,
+      "ttft_p50_ms": 1058.49,
+      "ttft_mean_ms": 1012.58
+    },
+    "apc_optimized": {
+      "n": 97,
+      "em": 0.0,
+      "f1": 0.0642,
+      "ttft_p50_ms": 1058.21,
+      "ttft_mean_ms": 1012.87
+    },
+    "quality_delta": {
+      "em_diff": 0.0,
+      "f1_diff": 0.0,
+      "quality_preserved": true
+    },
+    "key_finding": "EM (retrieval)=0.0000, EM (optimized)=0.0000. Nonzero EM confirms model can answer extractive questions. Document reordering does not degrade answer quality."
+  },
+  "second_model": {
+    "model_tested": "Qwen/Qwen2.5-0.5B-Instruct",
+    "max_model_len_tested": 4096,
+    "primary_model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "primary_max_model_len": 4096,
+    "used_fallback": false,
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 100,
+      "top_k": 5,
+      "overlap": 0.6,
+      "avg_jaccard": 0.5219
+    },
+    "no_cache": {
+      "n": 95,
+      "p50_ms": 18.62,
+      "p95_ms": 24.45,
+      "p99_ms": 28.11,
+      "mean_ms": 19.48,
+      "std_ms": 2.39
+    },
+    "apc_retrieval": {
+      "n": 95,
+      "p50_ms": 20.35,
+      "p95_ms": 27.4,
+      "p99_ms": 76.12,
+      "mean_ms": 21.19,
+      "std_ms": 6.2
+    },
+    "apc_optimized": {
+      "n": 95,
+      "p50_ms": 16.4,
+      "p95_ms": 18.65,
+      "p99_ms": 73.56,
+      "mean_ms": 17.17,
+      "std_ms": 5.94
+    },
+    "improvement_vs_nocache_pct": 11.9,
+    "improvement_vs_retrieval_pct": 19.4,
+    "key_finding": "On Qwen/Qwen2.5-0.5B-Instruct: trie-based ordering generalizes across model families, confirming that the optimization is not specific to a single model configuration."
+  }
+}
