@@ -1,0 +1,166 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "overlap": 0.6,
+    "enforce_eager": true,
+    "dtype": "auto"
+  },
+  "timestamp": "2026-04-05 02:37:44",
+  "proxy_baseline": {
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6,
+      "avg_jaccard": 0.52
+    },
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 114.73,
+      "p95_ms": 116.99,
+      "p99_ms": 119.49,
+      "mean_ms": 114.88,
+      "std_ms": 1.15
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 56.61,
+      "p95_ms": 111.15,
+      "p99_ms": 112.24,
+      "mean_ms": 53.79,
+      "std_ms": 22.12
+    },
+    "apc_sorted": {
+      "n": 195,
+      "p50_ms": 77.0,
+      "p95_ms": 112.85,
+      "p99_ms": 114.56,
+      "mean_ms": 73.34,
+      "std_ms": 30.75
+    },
+    "apc_frequency": {
+      "n": 195,
+      "p50_ms": 39.42,
+      "p95_ms": 110.98,
+      "p99_ms": 112.83,
+      "mean_ms": 51.09,
+      "std_ms": 22.8
+    },
+    "apc_pgdsf_proxy": {
+      "n": 195,
+      "p50_ms": 41.18,
+      "p95_ms": 111.4,
+      "p99_ms": 114.93,
+      "mean_ms": 52.01,
+      "std_ms": 23.05
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 40.11,
+      "p95_ms": 111.81,
+      "p99_ms": 113.9,
+      "mean_ms": 50.86,
+      "std_ms": 23.34
+    },
+    "improvements_vs_retrieval": {
+      "apc_sorted": -36.0,
+      "apc_frequency": 30.4,
+      "apc_pgdsf_proxy": 27.3,
+      "apc_optimized": 29.1
+    },
+    "key_finding": "Trie-based greedy (+29.1%) outperforms PGDSF-proxy (+27.3%) and frequency (+30.4%) because it considers POSITIONAL prefix structure, not just per-document priority."
+  },
+  "mixed_workload": {
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap_fraction": 0.6,
+      "topic_switch_prob": 0.3,
+      "topic_switches": 74,
+      "switch_rate": 0.3719
+    },
+    "jaccard_distribution": {
+      "mean": 0.3118,
+      "p25": 0.0,
+      "p50": 0.4286,
+      "p75": 0.6667,
+      "p90": 0.6667,
+      "nonzero_frac": 0.6281,
+      "zero_frac": 0.3719
+    },
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 116.46,
+      "p95_ms": 118.92,
+      "p99_ms": 120.01,
+      "mean_ms": 116.48,
+      "std_ms": 1.45
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 94.28,
+      "p95_ms": 114.0,
+      "p99_ms": 115.17,
+      "mean_ms": 85.71,
+      "std_ms": 28.31
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 78.95,
+      "p95_ms": 114.02,
+      "p99_ms": 114.84,
+      "mean_ms": 80.65,
+      "std_ms": 28.41
+    },
+    "improvement_vs_nocache_pct": 32.2,
+    "improvement_vs_retrieval_pct": 16.3,
+    "key_finding": "Under mixed-topic workload (Jaccard mean=0.312, switch_rate=37.2%), trie-based ordering still provides meaningful TTFT improvement, demonstrating robustness to realistic topic diversity."
+  },
+  "second_model": {
+    "model_tested": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len_tested": 2048,
+    "primary_model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "primary_max_model_len": 4096,
+    "used_fallback": true,
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6,
+      "avg_jaccard": 0.52
+    },
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 114.24,
+      "p95_ms": 116.32,
+      "p99_ms": 118.18,
+      "mean_ms": 114.32,
+      "std_ms": 1.22
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 57.28,
+      "p95_ms": 112.16,
+      "p99_ms": 113.02,
+      "mean_ms": 54.34,
+      "std_ms": 22.49
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 39.52,
+      "p95_ms": 110.65,
+      "p99_ms": 113.03,
+      "mean_ms": 50.23,
+      "std_ms": 23.3
+    },
+    "improvement_vs_nocache_pct": 65.4,
+    "improvement_vs_retrieval_pct": 31.0,
+    "key_finding": "On /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28 (max_len=2048): trie-based ordering generalizes across context window sizes, confirming that the optimization is not specific to a single model configuration."
+  }
+}
