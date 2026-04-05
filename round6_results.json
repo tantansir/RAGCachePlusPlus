@@ -1,0 +1,316 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true,
+    "dtype": "auto"
+  },
+  "timestamp": "2026-04-05 07:24:55",
+  "msmarco_real": {
+    "corpus_size": 1000,
+    "num_queries": 200,
+    "top_k": 5,
+    "jaccard_distribution": {
+      "mean": 0.0092,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 0.0,
+      "n_pairs": 199
+    },
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 57.17,
+      "p95_ms": 84.97,
+      "p99_ms": 97.78,
+      "mean_ms": 60.5,
+      "std_ms": 11.55
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 56.22,
+      "p95_ms": 85.56,
+      "p99_ms": 96.24,
+      "mean_ms": 54.56,
+      "std_ms": 15.87
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 50.47,
+      "p95_ms": 80.34,
+      "p99_ms": 96.12,
+      "mean_ms": 51.32,
+      "std_ms": 15.14
+    },
+    "improvements": {
+      "optimized_vs_nocache_p50_pct": 11.7,
+      "optimized_vs_nocache_p95_pct": 5.4,
+      "optimized_vs_nocache_mean_pct": 15.2,
+      "optimized_vs_retrieval_p50_pct": 10.2,
+      "optimized_vs_retrieval_p95_pct": 6.1,
+      "optimized_vs_retrieval_mean_pct": 5.9
+    },
+    "key_finding": "Real retrieval (TF-IDF over 1000 passages) produces natural Jaccard=0.0092. Trie ordering still improves vs retrieval: p50=10.2%, mean=5.9%."
+  },
+  "multihop_quality": {
+    "num_examples": 40,
+    "natural_retrieval": {
+      "n": 40,
+      "strict_em": 0.675,
+      "contains_em": 0.775,
+      "f1": 0.8624,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "natural_optimized": {
+      "n": 40,
+      "strict_em": 0.675,
+      "contains_em": 0.775,
+      "f1": 0.8624,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "reversed_retrieval": {
+      "n": 40,
+      "strict_em": 0.625,
+      "contains_em": 0.75,
+      "f1": 0.8257,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "reversed_optimized": {
+      "n": 40,
+      "strict_em": 0.625,
+      "contains_em": 0.75,
+      "f1": 0.8257,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "ordering_impact": {
+      "natural_f1_diff": 0.0,
+      "reversed_f1_diff": 0.0,
+      "reordering_safe": true
+    },
+    "key_finding": "Multi-hop QA: nat_retr F1=0.8624, nat_opt F1=0.8624, rev_retr F1=0.8257, rev_opt F1=0.8257. Reordering safe."
+  },
+  "sensitivity": {
+    "error": "invalid literal for int() with base 10: 'doc0'"
+  },
+  "freq_vs_trie": {
+    "workload": {
+      "num_docs": 500,
+      "num_queries": 200,
+      "top_k": 5,
+      "overlap": 0.6
+    },
+    "frequency_overall": {
+      "n": 195,
+      "p50_ms": 43.63,
+      "p95_ms": 121.39,
+      "p99_ms": 123.57,
+      "mean_ms": 55.56,
+      "std_ms": 25.12
+    },
+    "optimized_overall": {
+      "n": 195,
+      "p50_ms": 43.45,
+      "p95_ms": 121.0,
+      "p99_ms": 125.84,
+      "mean_ms": 54.97,
+      "std_ms": 25.52
+    },
+    "same_region": {
+      "n": 176,
+      "frequency": {
+        "n": 176,
+        "p50_ms": 43.25,
+        "mean_ms": 48.47,
+        "std_ms": 13.44
+      },
+      "optimized": {
+        "n": 176,
+        "p50_ms": 42.51,
+        "mean_ms": 47.75,
+        "std_ms": 13.55
+      },
+      "trie_vs_freq_p50_pct": 1.7
+    },
+    "switch_region": {
+      "n": 19,
+      "frequency": {
+        "n": 19,
+        "p50_ms": 121.39,
+        "mean_ms": 121.2,
+        "std_ms": 1.81
+      },
+      "optimized": {
+        "n": 19,
+        "p50_ms": 121.0,
+        "mean_ms": 121.81,
+        "std_ms": 2.61
+      },
+      "trie_vs_freq_p50_pct": 0.3
+    },
+    "key_finding": "Same-region: freq p50=43.2ms vs trie p50=42.5ms (similar, confirming p50 difference is noise). Region-switch: freq p50=121.4ms vs trie p50=121.0ms (trie wins on transitions by adapting via prefix match)."
+  }
+}

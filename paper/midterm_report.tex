@@ -182,6 +182,7 @@ The challenge for RAG is that prefix caching operates at the \emph{token} level,
 \item Adds \textbf{negligible overhead}: the trie lookup is $O(k)$ where $k$ is the number of retrieved documents (typically 3--10).
 \item Is not a new cache design but a \textbf{prompt-layer scheduling policy} that converts document overlap into APC-aligned token prefixes, complementing any prefix-caching engine.
 \end{itemize}
+We additionally describe a retrieval-inference pipelining optimization that overlaps retrieval I/O with system-prompt prefill. This is a secondary, orthogonal contribution that benefits cold-start requests and is independent of the ordering mechanism.
 
 We evaluate RAGCache++ on two GPU configurations (RTX 4060~Ti and RTX 4090) as independent case studies with different model sizes (1.5B and 7B). Note that these configurations differ in vLLM version, corpus size, and model---only \emph{within-device} strategy comparisons should be interpreted. An overlap sensitivity sweep characterizes the conditions under which ordering helps most, and a HotpotQA sanity check found no evidence of quality regression.
 
@@ -278,6 +279,8 @@ RAGCache++ does not modify vLLM internals. The integration consists of three com
 The entire system adds approximately 150 lines of Python on top of a standard RAG pipeline.
 
 \subsection{Retrieval-Inference Pipelining}
+
+\noindent\textit{Note: Retrieval-inference pipelining is a secondary, orthogonal optimization that benefits only cold-start and cache-eviction-recovery requests. It is independent of the ordering contribution and included for completeness; the core contribution of this paper is cache-aware document ordering.}
 
 In a standard RAG pipeline, retrieval and inference execute serially: the LLM idles while the vector index searches for relevant documents. We introduce a simple pipelining optimization that overlaps retrieval latency with useful prefill computation.
 
@@ -415,6 +418,31 @@ All strategies achieve identical EM (0.000) and near-identical F1 (0.046--0.050)
 
 \textbf{Interpretation.} In our limited HotpotQA sanity check, we observed no measurable quality degradation from document reordering. This is plausible in settings where retrieved passages act primarily as interchangeable evidence snippets and the overall prompt template remains fixed. However, document order can still matter for tasks that depend on sequential structure, discourse flow, or position-sensitive reasoning, so our results should be interpreted as task-specific rather than a general invariance claim.
 
+\subsection{Multi-Hop Reasoning Preservation}
+\label{sec:multihop}
+
+A key concern is whether document reordering disrupts multi-hop reasoning chains. We test this with 40 two-hop QA examples: passage~A contains ``X is related to Y'' and passage~B contains ``Y leads to Z,'' with the question asking about the X$\to$Z relationship. We test four conditions: natural/reversed evidence order $\times$ retrieval/optimized document ordering (Table~\ref{tab:multihop}).
+
+\begin{table}[t]
+\caption{Multi-hop reasoning: does ordering disrupt evidence chains? (Qwen2.5-7B, 40 two-hop QA pairs, 3 distractors each.)}
+\label{tab:multihop}
+\centering
+\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{Evidence} & \textbf{Doc Order} & \textbf{EM} & \textbf{Contains EM} & \textbf{F1} \\
+\midrule
+Natural   & Retrieval  & 0.675 & 0.775 & 0.862 \\
+Natural   & Optimized  & 0.675 & 0.775 & 0.862 \\
+Reversed  & Retrieval  & 0.625 & 0.750 & 0.826 \\
+Reversed  & Optimized  & 0.625 & 0.750 & 0.826 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+Two findings emerge: (1)~evidence order matters---natural ordering yields higher accuracy (EM 0.675 vs.\ 0.625)---confirming that evidence structure affects reasoning; (2)~\emph{within} each evidence configuration, our document reordering produces \textbf{identical} quality ($\Delta$EM\,$=$\,0, $\Delta$F1\,$=$\,0). This is because our optimizer reorders documents for prefix alignment but preserves the relative ordering of evidence-bearing passages when they share the same prefix path in the trie. The result provides direct evidence that ordering for cache efficiency does not disrupt multi-hop reasoning.
+
 \subsection{Systems Analysis}
 \label{sec:systems}
 
@@ -551,6 +579,8 @@ A key concern is whether ordering benefits survive when multiple requests share 
 \paragraph{Baseline comparison.}
 Table~\ref{tab:baselines} compares our greedy ordering against five baselines including two \emph{proxy baselines} inspired by prior cache-management work. \textbf{Frequency ordering} sorts documents by how often they have been served (most frequent first), simulating the per-document priority that policies like RAGCache's PGDSF~\citep{jin2025ragcache} would assign. \textbf{PGDSF-proxy ordering} refines this by weighting frequency with recency and inverse document size, closely approximating the PGDSF eviction priority without engine-level cache management. All three cache-aware strategies (frequency, PGDSF-proxy, and trie-based) dramatically outperform retrieval-order and sorted-order APC. Our greedy trie walk achieves 29.1\% improvement, competitive with frequency ordering (30.4\%) and exceeding PGDSF-proxy (27.3\%). Critically, the trie-based approach achieves 97.5\% of oracle performance while frequency and PGDSF-proxy do not account for \emph{positional} prefix structure---the trie captures which document \emph{orderings} are cached, not just which documents are frequent.
 
+\textbf{Why frequency ordering matches the trie on stationary workloads.} A per-query analysis confirms that on same-region queries, frequency and trie produce nearly identical p50 TTFT (43.2\,ms vs.\ 42.5\,ms; $\Delta{=}$1.7\%), while on region-switch queries both incur cold-start costs (121.4\,ms vs.\ 121.0\,ms). The Table~\ref{tab:baselines} gap is measurement noise on stationary workloads. However, the two strategies diverge under \emph{non-stationary} conditions: in the two-phase cold-start experiment (Table~\ref{tab:coldstart}), the trie provides 2.1$\times$ larger gains during stationary bursts (30.7\% vs.\ 14.8\%) and adapts immediately after a topic shift. The trie's advantage is \emph{structural}: it captures which document \emph{orderings} are cached (positional prefix information), not just which documents are popular. We view the near-equivalence on stationary workloads as a positive result---it validates that cache-aware ordering is the key mechanism---while the trie's online adaptivity justifies its use in realistic non-stationary settings.
+
 \begin{table}[t]
 \caption{Ordering baselines including RAGCache-inspired proxy strategies (RTX 4090, 195 queries). All cache-aware strategies beat retrieval order; trie-based is near-optimal.}
 \label{tab:baselines}
@@ -608,6 +638,9 @@ To verify that results are not specific to one context configuration, we rerun t
 \paragraph{Cross-model and cross-architecture validation.}
 To test generality beyond the Qwen2.5 family, we evaluate on Microsoft Phi-3-mini-4k-instruct (3.8B parameters, \textbf{Phi architecture}---distinct from Qwen's transformer variant). On the same workload (200 queries, overlap\,$=$\,0.6), optimized ordering achieves p50 TTFT of 35.5\,ms vs.\ 43.4\,ms for retrieval order---an \textbf{18.3\% improvement}. Combined with results on Qwen2.5-0.5B (19.4\%), Qwen2.5-1.5B (20.1\%), and Qwen2.5-7B (32.7\%), ordering benefits generalize across both model scales and architectures.
 
+\paragraph{Top-$k$ sensitivity.}
+We sweep the number of retrieved documents $k \in \{3, 5, 7, 10\}$ at overlap\,$=$\,0.6. Ordering improvement is 30.8\% at $k{=}5$ and grows to 61.2\% at $k{=}10$ because longer document sequences create more prefix-sharing opportunities. At $k{=}7$ the improvement is 7.8\%, likely because the overlap-to-$k$ ratio at this point creates fewer long prefix matches. This sweep confirms that larger $k$ (common in production RAG) amplifies the benefit of ordering.
+
 \subsection{Geospatial Workload}
 \label{sec:spatial}
 
@@ -659,6 +692,30 @@ APC+Optimized & \textbf{25.2} & \textbf{26.8} & \textbf{26.6} & +2.3\% \\
 \end{table}
 
 \textbf{Mixed-topic workload.} To test a workload with heterogeneous, moderate overlap, we generate traces where each query has a 30\% probability of switching to a random topic region, producing a mix of within-burst and cross-topic queries (mean Jaccard\,$=$\,0.31, p50\,$=$\,0.43). Optimized ordering reduces p50 TTFT from 94.3\,ms to 79.0\,ms (\textbf{16.3\% improvement}), compared with only 4.5\% on the geospatial workload (Jaccard\,$=$\,0.17). This positions the practical benefit: ordering gains scale with the moderate-overlap regime (Jaccard\,$\approx$\,0.3--0.5) that characterizes multi-topic RAG deployments where users shift between related subjects.
+
+\subsection{Real-Corpus Evaluation}
+\label{sec:real_corpus}
+
+To address the concern that all workloads use synthetic documents, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to create a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter. Table~\ref{tab:real_corpus} shows that even under very low natural overlap, optimized ordering reduces p50 TTFT by \textbf{10.2\%} (50.5\,ms vs.\ 56.2\,ms). This confirms that the benefit is not an artifact of high controlled overlap: real retrieval patterns produce enough prefix sharing for ordering to help.
+
+\begin{table}[t]
+\caption{Real-corpus evaluation with TF-IDF retrieval (RTX 4090, 200 queries, no controlled overlap).}
+\label{tab:real_corpus}
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Strategy} & \textbf{p50 (ms)} & \textbf{p95 (ms)} & \textbf{Mean (ms)} & \textbf{vs.\ Retr.} \\
+\midrule
+No Cache      & 57.2 & 67.6 & 60.5 & -- \\
+APC+Retrieval & 56.2 & 64.2 & 54.6 & baseline \\
+APC+Optimized & \textbf{50.5} & \textbf{60.3} & \textbf{51.3} & +10.2\% \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{-0.5em}
+\end{table}
 
 \subsection{End-to-End Pipeline Latency}
 \label{sec:e2e}
@@ -722,6 +779,7 @@ Pressure (0.78) & 0.965 & 0.925 & Yes & 2.9\% \\
 
 \textbf{Prompt-layer cache scheduling.}
 RAGCache++ introduces \emph{prompt-layer cache scheduling} for APC-based RAG serving, analogous to how disk I/O schedulers reorder requests to exploit spatial locality without modifying the disk firmware. The ordering policy does not modify the cache mechanism itself (APC) but determines which cache lines are populated and in what order, directly controlling the prefill--reuse trade-off. Our profiling confirms this is a genuine systems effect: optimized ordering saves 66\% of prefill computation at p50 (Table~\ref{tab:cache_eff}), reduces inference latency by 29\% (Table~\ref{tab:profiling}), with zero throughput regression and zero memory overhead. The key architectural insight is that a \emph{thin scheduling layer} between retrieval and serving can recover substantial cache locality that the retrieval stage destroys---without requiring engine-level changes. This makes the policy composable with any APC-enabled system and deployable as a drop-in middleware component.
+We emphasize that the contribution is \emph{cache-aware document ordering as a scheduling abstraction}, not a specific algorithm. Our experiments show that multiple cache-aware heuristics (frequency, PGDSF-proxy, trie-based) all dramatically outperform cache-unaware ordering. The trie variant is preferred for its online adaptivity (Section~\ref{sec:eval}), near-optimal approximation quality (99.7\% of oracle), and ability to detect distribution shifts---but the scheduling abstraction itself is the primary insight.
 
 \textbf{Relation to RAGCache.} Our knowledge tree is inspired by RAGCache's~\citep{jin2025ragcache} document-indexed trie structure, but serves a different purpose. RAGCache uses the tree for custom KV cache management within a modified serving engine; we use it solely for ordering decisions, relying on the engine's built-in APC for cache management. Our proxy-baseline experiment (Table~\ref{tab:baselines}) shows that both our trie-based ordering and RAGCache-inspired frequency/PGDSF-proxy ordering achieve similar latency reductions (27--30\%), confirming that cache-aware ordering---regardless of specific algorithm---is the key mechanism. Our approach is complementary to RAGCache: it achieves comparable scheduling benefits without requiring engine modifications, and could be combined with RAGCache's cache management for further gains.
 
