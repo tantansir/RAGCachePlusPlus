@@ -1,0 +1,128 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true,
+    "num_queries": 200,
+    "overlap": 0.6
+  },
+  "timestamp": "2026-04-05 10:58:09",
+  "full_pipeline": {
+    "bare_vllm": {
+      "n": 200,
+      "p50_ms": 59.28,
+      "p95_ms": 115.5,
+      "p99_ms": 117.75,
+      "mean_ms": 55.94,
+      "std_ms": 24.0
+    },
+    "simple_wrapper": {
+      "n": 200,
+      "p50_ms": 41.11,
+      "p95_ms": 116.55,
+      "p99_ms": 120.74,
+      "mean_ms": 52.64,
+      "std_ms": 25.06,
+      "avg_predicted_prefix": 3.47,
+      "speedup_vs_bare": 1.063
+    },
+    "integrated_proxy": {
+      "n": 200,
+      "p50_ms": 41.65,
+      "p95_ms": 116.9,
+      "p99_ms": 118.38,
+      "mean_ms": 54.18,
+      "std_ms": 24.83,
+      "avg_predicted_prefix": 3.29,
+      "mismatches": 1,
+      "feedback_accuracy": 0.995,
+      "pruned_paths": 1,
+      "cache_stats": {
+        "total_lookups": 0,
+        "prefix_hits": 0,
+        "non_prefix_hits": 0,
+        "misses": 0,
+        "hit_rate": 0.0,
+        "byte_hit_rate": 0.0,
+        "gpu_hits": 0,
+        "host_hits": 0,
+        "evictions_gpu": 38,
+        "evictions_host": 540,
+        "admissions": 1000,
+        "admission_rejections": 0,
+        "prefetch_issued": 0,
+        "prefetch_used": 0,
+        "prefetch_hit_rate": 0.0,
+        "total_prefill_savings_ms": 0.0,
+        "total_movement_overhead_ms": 0.0,
+        "total_policy_overhead_ms": 47.34386503696442
+      },
+      "memory_profile": {
+        "gpu_capacity_blocks": 1000,
+        "gpu_allocated_blocks": 988,
+        "gpu_free_blocks": 12,
+        "gpu_utilization": 0.988,
+        "host_capacity_blocks": 5000,
+        "host_allocated_blocks": 4992,
+        "host_free_blocks": 8,
+        "host_utilization": 0.9984,
+        "tree_node_count": 318,
+        "prefetched_pending": 0
+      },
+      "speedup_vs_bare": 1.032
+    }
+  },
+  "feedback_loop": {
+    "stale_trie": {
+      "n": 200,
+      "p50_ms": 41.06,
+      "p95_ms": 117.1,
+      "p99_ms": 119.65,
+      "mean_ms": 52.91,
+      "std_ms": 25.12,
+      "mismatches_observed": 1,
+      "prediction_accuracy": 0.995
+    },
+    "feedback_proxy": {
+      "n": 200,
+      "p50_ms": 42.39,
+      "p95_ms": 116.97,
+      "p99_ms": 122.42,
+      "mean_ms": 54.21,
+      "std_ms": 24.86,
+      "mismatches_observed": 1,
+      "prediction_accuracy": 0.995,
+      "pruned_paths": 1
+    },
+    "comparison": {
+      "stale_mismatches": 1,
+      "feedback_mismatches": 1,
+      "mismatch_reduction": 0.0,
+      "stale_accuracy": 0.995,
+      "feedback_accuracy": 0.995
+    }
+  },
+  "overhead_profile": {
+    "ordering": {
+      "mean_ms": 0.0165,
+      "p50_ms": 0.014,
+      "p99_ms": 0.04,
+      "max_ms": 0.04
+    },
+    "prompt_build": {
+      "mean_ms": 0.0324,
+      "p50_ms": 0.0291,
+      "p99_ms": 0.0692,
+      "max_ms": 0.0692
+    },
+    "inference": {
+      "mean_ms": 52.8493,
+      "p50_ms": 41.968,
+      "p99_ms": 139.8377,
+      "max_ms": 139.8377
+    },
+    "total_system_overhead_ms": 0.0489,
+    "overhead_fraction_of_ttft": 0.000925
+  }
+}

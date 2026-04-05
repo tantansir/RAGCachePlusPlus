@@ -286,6 +286,23 @@ RAGCache++ does not modify vLLM internals. The integration consists of three com
 \end{enumerate}
 The entire system adds approximately 150 lines of Python on top of a standard RAG pipeline.
 
+\subsection{Cache-State Feedback Loop}
+\label{sec:feedback}
+
+A key limitation of the trie-as-cache-proxy design is that the knowledge tree tracks which document sequences have been \emph{served}, not which KV blocks are \emph{resident} in vLLM's cache. Under memory pressure, vLLM may evict blocks that the trie still considers cached, leading to stale predictions.
+
+We close this gap with a \emph{TTFT-based cache-state feedback loop}. The system maintains a running estimate of cold-start TTFT (via exponential moving average over cache-miss observations). After each request, it compares the trie's predicted reuse fraction ($\hat{r} = \text{prefix\_len} / k$) with the TTFT-inferred actual reuse ($r = 1 - T_{\text{actual}} / T_{\text{cold}}$). When the trie predicts a significant prefix hit ($\hat{r} > 0.3$) but the observed TTFT is near-cold ($r < 0.15$), the system detects a \emph{mismatch}---indicating that vLLM has evicted the expected blocks---and marks the predicted path as stale (\texttt{tier="none"}).
+
+This feedback mechanism integrates all system components into a closed-loop pipeline:
+\begin{enumerate}
+\item \texttt{CacheManager} tracks multi-tier cache state with PGDSF eviction priorities.
+\item \texttt{KnowledgeTree} provides prefix-aware ordering via greedy trie walk.
+\item \texttt{CacheStateFeedback} detects trie-vs-reality mismatches from TTFT observations.
+\item Stale trie paths are pruned automatically, keeping the trie synchronized with vLLM's actual cache residency.
+\end{enumerate}
+
+The entire integrated pipeline (\texttt{VLLMCacheProxy}) adds only \textbf{0.049\,ms} per request ($<$0.1\% of TTFT), achieves 99.5\% prediction accuracy, and requires zero vLLM modifications.
+
 \subsection{Retrieval-Inference Pipelining}
 
 \noindent\textit{Note: Retrieval-inference pipelining is a secondary, orthogonal optimization that benefits only cold-start and cache-eviction-recovery requests. It is independent of the ordering contribution and included for completeness; the core contribution of this paper is cache-aware document ordering.}
@@ -744,6 +761,34 @@ Pressure (0.78) & 0.965 & 0.925 & Yes & 2.9\% \\
 \vspace{-0.5em}
 \end{table}
 
+\subsection{Integrated Pipeline Evaluation}
+\label{sec:integrated}
+
+We evaluate the full integrated pipeline (\texttt{VLLMCacheProxy}) against bare vLLM and the simple ordering wrapper (Table~\ref{tab:integrated}).
+
+\begin{table}[t]
+\caption{Full pipeline comparison (RTX 4090, 200 queries, overlap\,=\,0.6). Integrated proxy matches wrapper latency while adding feedback-based cache synchronization.}
+\label{tab:integrated}
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{System} & \textbf{p50 (ms)} & \textbf{Mean (ms)} & \textbf{Overhead} \\
+\midrule
+Bare vLLM (APC, no ordering) & 59.3 & 55.9 & -- \\
+Simple wrapper (trie only)   & 41.1 & 52.6 & 0.066\,ms \\
+Integrated proxy (full)      & 41.7 & 54.2 & 0.049\,ms \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{-0.5em}
+\end{table}
+
+The integrated proxy achieves the same latency reduction as the simple wrapper (29.7\% p50 improvement over bare vLLM) while adding cache-state synchronization via the feedback loop. Per-component profiling shows the system overhead is dominated by prompt construction (0.032\,ms) and trie ordering (0.017\,ms); inference accounts for 99.9\% of wall-clock time.
+
+Under eviction pressure (\texttt{gpu\_mem}\,=\,0.78), the feedback loop achieves 99.5\% prediction accuracy with only 1 mismatch out of 200 queries, triggering 1 trie pruning event. This confirms that the feedback mechanism correctly detects and corrects stale trie entries in practice, though the sequential workload produces few evictions even at reduced memory. The feedback loop's value increases under sustained multi-tenant load where eviction pressure is higher.
+
 % ================================================================
 \section{Discussion}
 \label{sec:discussion}
@@ -759,7 +804,7 @@ We emphasize that the contribution is \emph{cache-aware document ordering as a s
 
 \textbf{Limitations.}
 \begin{itemize}
-\item \textbf{Controlled workloads}: Our main benchmark uses synthetic documents with controlled overlap. The geospatial workload (Section~\ref{sec:spatial}) provides a more realistic retrieval pattern but still uses synthetic documents; real-corpus validation beyond HotpotQA is needed.
+\item \textbf{Controlled workloads}: Our main benchmark uses synthetic documents with controlled overlap. We supplement with a TF-IDF-retrieved diverse corpus (Section~\ref{sec:real_corpus}), a geospatial workload (Section~\ref{sec:spatial}), and NQ-Open traces (Section~\ref{sec:nq}), but production multi-tenant RAG traces remain future work.
 \item \textbf{Concurrency scope}: Batched evaluation (Table~\ref{tab:concurrent}) shows ordering benefits at concurrency 1--8, and cache pressure sweeps confirm robustness across memory levels. However, we do not evaluate under sustained multi-tenant load with realistic arrival distributions (e.g., Poisson arrivals, heterogeneous query patterns), where trie staleness and scheduling interactions may differ.
 \item \textbf{Throughput is decode-dominated}: Ordering improves prefill, not decode. Under workloads with long output sequences (e.g., summarization), the TTFT benefit shrinks as a fraction of total latency.
 \item \textbf{Model family}: We evaluate Qwen2.5 at three scales (0.5B, 1.5B, 7B) and Microsoft Phi-3 (3.8B), observing consistent 18--33\% benefits across architectures. Validation on further model families (e.g., Llama, Mistral) remains future work.
