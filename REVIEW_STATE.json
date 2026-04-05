@@ -1,9 +1,9 @@
 {
-  "round": 3,
-  "threadId": "019d5956-1c1d-7053-8cf7-648d678cf328",
+  "round": 2,
+  "threadId": "019d5bac-8b26-7170-b0e1-a9af16b19784",
   "status": "completed",
-  "last_score": 6.5,
-  "last_verdict": "Almost (credible MLSys/EuroSys submission draft)",
+  "last_score": 6.0,
+  "last_verdict": "Almost — honest and plausible, needs one more piece of real-workload evidence",
   "pending_experiments": [],
-  "timestamp": "2026-04-04T18:00:00"
+  "timestamp": "2026-04-05T01:00:00"
 }

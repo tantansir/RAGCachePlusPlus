@@ -139,3 +139,59 @@ Score: 6.5/10. Verdict: Almost. This is now in "credible submission draft" terri
 
 ## Method Description
 RAGCache++ is a prompt-layer cache scheduling policy for APC-based RAG serving. It maintains a knowledge tree (trie) indexed by document-ID sequences to track which orderings are currently in the KV cache. For each incoming RAG query, a greedy algorithm walks the trie to find the longest cached prefix among the retrieved documents, places those documents first, and appends remaining documents in retrieval-rank order. The reordered prompt is sent to vLLM with APC enabled, which sees a longer prefix match and skips more prefill computation. The system adds ~150 lines of Python at the prompt-construction layer with <0.13% overhead, zero GPU memory cost, and zero throughput regression.
+
+---
+
+# Auto Review Loop: Session 2 (Post-Restructuring)
+
+## Round 1 (2026-04-05T00:00:00)
+
+### Assessment (Summary)
+- Score: 5/10
+- Verdict: No
+- Key criticisms:
+  1. Novelty below bar — frequency matches trie on stationary workloads
+  2. Feedback loop under-exercised — only 1 mismatch in 200 queries
+  3. External validity weak — NQ/real-corpus still use synthetic documents
+  4. Quality evidence not strong — near-zero F1 on 2/3 settings
+  5. Baseline story muddled — contradictory claims trie vs frequency
+  6. Measurement proxies — no direct APC block instrumentation
+  7. Polish issues — wrong citation, overlap-sweep bug explanation
+
+### Actions Taken
+(implementing paper-only fixes)
+
+### Status
+- Continuing to Round 2
+
+## Round 2 (2026-04-05T01:00:00)
+
+### Assessment (Summary)
+- Score: 6/10
+- Verdict: Almost — "honest and plausible, needs one more piece of real-workload evidence"
+- Remaining weaknesses:
+  1. External validity — still no public real RAG benchmark
+  2. Feedback loop — honestly presented but barely exercised
+  3. Measurement proxies — TTFT-inferred, not direct APC instrumentation
+  4. Contribution borderline — "strong deployable study, not clearly new mechanism"
+  5. Quality story thin — scoped correctly but small evidence base
+
+### Actions Taken
+1. Reframed contribution as deployment-ready realization (not algorithmic novelty)
+2. Clarified trie vs frequency: "when does trie outperform?"
+3. Fixed NQ-Open citation (was citing HotpotQA)
+4. Honestly acknowledged feedback loop limitation
+5. Scoped quality claim to extractive settings
+
+### Status
+- **STOP CONDITION MET**: Score 6 >= 6
+
+## Final Summary (Session 2)
+- **Round 1 score**: 5/10
+- **Round 2 score**: 6/10
+- **Total rounds**: 2 of 4 max
+- **Key improvement**: Honest framing eliminates overclaiming — reviewer trust increased
+- **Remaining for top-venue**: real-workload validation, sustained eviction test for feedback loop
+
+## Method Description
+RAGCache++ is a prompt-layer cache scheduling policy for APC-based RAG serving. The system consists of: (1) a KnowledgeTree (trie) tracking cached document orderings, (2) a greedy O(k) ordering algorithm achieving 99.7% of oracle, (3) a CacheManager with PGDSF eviction and multi-tier block allocation, (4) a CacheStateFeedback module using TTFT observations to detect and prune stale trie entries, and (5) a VLLMCacheProxy integrating all components with real vLLM inference. The system adds 0.049ms overhead per request and requires zero vLLM modifications.
