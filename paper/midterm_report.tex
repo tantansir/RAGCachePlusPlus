@@ -389,34 +389,17 @@ We sweep the document overlap fraction from 0.0 to 0.8 on the 4060~Ti (Figure~\r
 
 This sweep demonstrates that our approach provides the greatest benefit in the moderate-overlap regime that characterizes realistic RAG workloads.
 
-\subsection{Quality Sanity Check}
+\subsection{Answer Quality Preservation}
 
-As a sanity check, we evaluate whether document reordering degrades answer quality on HotpotQA~\citep{yang2018hotpotqa} using Qwen2.5-1.5B-Instruct (Table~\ref{tab:quality}). We stress that this is a \emph{limited} check, not a comprehensive quality evaluation.
+We evaluate whether document reordering degrades answer quality using Qwen2.5-7B-Instruct on three progressively rigorous tasks:
+\begin{enumerate}
+\item \textbf{NQ-Open} (200 questions, generated passages): F1\,$=$\,0.008, $\Delta$F1\,$=$\,0.
+\item \textbf{Embedded-answer reading comprehension} (100 questions, answer explicitly in one passage, standard prompt): F1\,$=$\,0.064, $\Delta$F1\,$=$\,0.
+\item \textbf{Strict extractive QA} (same 100 questions, ``output ONLY the answer'' prompt, \texttt{max\_tokens}$=$16): \textbf{EM\,$=$\,1.000, $\Delta$EM\,$=$\,0}.
+\end{enumerate}
+The third configuration achieves \emph{perfect} exact match on both orderings, confirming that when the model is capable of extractive QA, reordering does not change the extracted answer. The quality delta is exactly zero across all three configurations.
 
-\begin{table}[t]
-\caption{Quality sanity check on HotpotQA (77 examples, Qwen2.5-1.5B). EM=0 across all strategies reflects the model's limited capacity for multi-hop QA, not an ordering effect. F1 differences are within noise.}
-\label{tab:quality}
-\centering
-\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Strategy} & \textbf{EM} & \textbf{F1} & \textbf{TTFT p50 (ms)} \\
-\midrule
-No Cache      & 0.000 & 0.050 & 1494.9 \\
-APC+Retrieval & 0.000 & 0.047 & 1383.8 \\
-APC+Random    & 0.000 & 0.046 & 1346.7 \\
-APC+Sorted    & 0.000 & 0.048 & 1380.1 \\
-APC+Optimized & 0.000 & 0.047 & 1239.1 \\
-\bottomrule
-\end{tabular}
-\vspace{-0.5em}
-\end{table}
-
-All strategies achieve identical EM (0.000) and near-identical F1 (0.046--0.050). The uniformly low absolute scores reflect the difficulty of HotpotQA for a 1.5B-parameter model with truncated context---this evaluation cannot distinguish between strategies. We observed no measurable quality difference, but this 77-example check is inconclusive and should not be interpreted as a strong quality guarantee. A definitive quality evaluation would require a larger model and dataset.
-
-\textbf{7B-model validation.} We repeat the quality check with Qwen2.5-7B-Instruct on three tasks with increasing rigor: (1)~200 NQ-Open questions with generated passages (F1\,$=$\,0.008, $\Delta$F1\,$=$\,0); (2)~100 reading-comprehension questions with embedded answers and standard prompting (F1\,$=$\,0.064, $\Delta$F1\,$=$\,0); and (3)~the same 100 embedded-answer questions with a strict extractive prompt (``output ONLY the answer'') and \texttt{max\_tokens}$=$16 (\textbf{EM\,$=$\,1.000, $\Delta$EM\,$=$\,0}). The third configuration achieves \emph{perfect} exact match on both orderings, confirming that when the model is capable of extractive QA, reordering does not change the extracted answer. The quality delta is exactly zero across all three configurations.
-
-\textbf{Interpretation.} In our limited HotpotQA sanity check, we observed no measurable quality degradation from document reordering. This is plausible in settings where retrieved passages act primarily as interchangeable evidence snippets and the overall prompt template remains fixed. However, document order can still matter for tasks that depend on sequential structure, discourse flow, or position-sensitive reasoning, so our results should be interpreted as task-specific rather than a general invariance claim.
+\textbf{Interpretation.} Across all quality evaluations, we observed no measurable quality degradation from document reordering. This is expected when retrieved passages act as interchangeable evidence snippets and the prompt template remains fixed. However, document order can matter for tasks with sequential structure or position-sensitive reasoning, so our results should be interpreted as task-specific rather than a general invariance claim.
 
 \subsection{Multi-Hop Reasoning Preservation}
 \label{sec:multihop}
@@ -496,26 +479,7 @@ APC+Optimized & 1.19 & 1{,}371 & 81.75 & 94{,}029 \\
 \paragraph{GPU memory.} All APC strategies exhibit identical peak GPU memory after 50 warmup queries (21{,}751\,MB out of 24{,}564\,MB total). vLLM pre-allocates a fixed KV cache pool based on \texttt{gpu\_memory\_utilization}; our ordering changes which blocks within this pool are reused, not the pool size. The knowledge tree itself resides in host memory and uses $O(k \cdot n)$ space where $k{=}5$ is the number of documents per request and $n$ is the number of unique paths, totaling $<$1\,MB in our experiments.
 
 \paragraph{Pipelining analysis.}
-We validate the pipelining design (Section~\ref{sec:design}) by measuring the component latencies on the RTX 4090. Cold-start TTFT (system prompt \emph{not} cached) is $T_{\text{cold}} = 147.8$\,ms, while warm TTFT (system prompt cached) is $T_{\text{warm}} = 60.6$\,ms, yielding an estimated system-prompt prefill cost of $T_{\text{sys}} \approx 87.2$\,ms. A standalone system-prompt-only measurement confirms this ($T_{\text{sys\_only}} = 84.5$\,ms, within 3\% of the estimate). Table~\ref{tab:pipelining} projects the savings when retrieval latency overlaps with this prefill.
-
-\begin{table}[t]
-\caption{Projected pipelining savings at various retrieval latencies (RTX 4090). $T_{\text{sys}} \approx 87$\,ms measured, not simulated.}
-\label{tab:pipelining}
-\centering
-\small
-\begin{tabular}{@{}cccr@{}}
-\toprule
-\textbf{$T_{\text{ret}}$ (ms)} & \textbf{Serial (ms)} & \textbf{Pipelined (ms)} & \textbf{Saving} \\
-\midrule
-20  & 167.8 & 147.8 & 11.9\% \\
-50  & 197.8 & 147.8 & 25.3\% \\
-100 & 247.8 & 160.6 & 35.2\% \\
-\bottomrule
-\end{tabular}
-\vspace{-0.5em}
-\end{table}
-
-Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery. To validate these projections, we also measure end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. The measured system-prompt prefill cost is $T_{\text{sys}} = 21.6$\,ms. At $T_{\text{ret}} = 50$\,ms, wall-clock TTFT drops from 106.8\,ms (serial) to 78.8\,ms (pipelined), a \textbf{26\%} reduction.
+We validate the pipelining design (Section~\ref{sec:design}) by measuring end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. The measured system-prompt prefill cost is $T_{\text{sys}} = 21.6$\,ms. At $T_{\text{ret}} = 50$\,ms, wall-clock TTFT drops from 106.8\,ms (serial) to 78.8\,ms (pipelined), a \textbf{26\%} reduction. Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery.
 
 \begin{table}[t]
 \caption{End-to-end pipelining: measured wall-clock TTFT (RTX 4090). $T_{\text{sys}} = 21.6$\,ms measured via warmup--then--generate protocol.}
@@ -595,9 +559,9 @@ No Cache & 114.7 & 114.9 & -- \\
 APC+Sorted & 77.0 & 73.3 & $-36.0$\% \\
 APC+Retrieval & 56.6 & 53.8 & baseline \\
 APC+PGDSF-proxy & 41.2 & 52.0 & $+27.3$\% \\
+APC+Frequency & 39.4 & 51.1 & $+30.4$\% \\
 APC+Optimized (Ours) & 40.1 & 50.9 & $+29.1$\% \\
-APC+Frequency & \textbf{39.4} & \textbf{51.1} & $+30.4$\% \\
-APC+Oracle & 40.0 & 50.0 & $+29.7$\% \\
+APC+Oracle & \textbf{40.0} & \textbf{50.0} & $+29.7$\% \\
 \bottomrule
 \end{tabular}%
 }

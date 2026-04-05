@@ -149,7 +149,7 @@ legend_elements = [
     Line2D([0], [0], marker="s", color="w", markerfacecolor="white",
            markeredgecolor="black", markersize=6, label="4090"),
 ]
-ax.legend(handles=legend_elements, fontsize=6, loc="upper right")
+ax.legend(handles=legend_elements, fontsize=6, loc="upper left")
 ax.set_xlabel("Prefix Hit Rate (%)")
 ax.set_ylabel("TTFT p50 (ms)")
 ax.set_title("Hit Rate vs. Latency", fontsize=9)
