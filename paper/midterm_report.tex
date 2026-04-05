@@ -174,17 +174,17 @@ Modern serving engines address this with \emph{prefix caching}: vLLM's Automatic
 
 The challenge for RAG is that prefix caching operates at the \emph{token} level, while RAG retrieval operates at the \emph{document} level. Two consecutive queries may retrieve four out of five identical documents, yet if those documents appear in different positions within their respective prompts, the token-level prefix diverges immediately, and no cache blocks are reused. This gap between document overlap and prefix overlap is the core inefficiency we target.
 
-\textbf{Key insight.}  Because vLLM's APC matches prefixes by token-hash identity, the \emph{ordering} of documents within a prompt directly determines cache reuse. If we can arrange documents so that the shared subset appears first and in a consistent order, document overlap becomes prefix overlap.
+\textbf{Key insight.}  The observation that document ordering affects prefix cache reuse is well-established~\citep{jin2025ragcache,cachecraft2025,contextpilot2025}. Our contribution is not this observation but rather a precise, minimal implementation: because vLLM's APC matches prefixes by token-hash identity, we show that a simple prompt-layer reordering---requiring zero engine modifications---is sufficient to capture most of the available cache benefit.
 
 \textbf{Our approach.} We propose RAGCache++, a lightweight prompt-level optimization that reorders documents to maximize prefix sharing with cached sequences. The system maintains a \emph{knowledge tree}---a trie indexed by document-ID sequences---that tracks which document orderings are currently in the KV cache. For each new request, a greedy algorithm walks the trie to find the longest cached prefix, places those documents first, and appends the remaining documents in retrieval-rank order. This approach:
 \begin{itemize}
-\item Requires \textbf{no modification} to vLLM or any serving engine---it operates entirely at the prompt-construction layer.
+\item Requires \textbf{no modification} to vLLM or any serving engine---it operates entirely at the prompt-construction layer (${\sim}$150 lines of Python).
 \item Adds \textbf{negligible overhead}: the trie lookup is $O(k)$ where $k$ is the number of retrieved documents (typically 3--10).
 \item Is not a new cache design but a \textbf{prompt-layer scheduling policy} that converts document overlap into APC-aligned token prefixes, complementing any prefix-caching engine.
 \end{itemize}
-We additionally describe a retrieval-inference pipelining optimization that overlaps retrieval I/O with system-prompt prefill. This is a secondary, orthogonal contribution that benefits cold-start requests and is independent of the ordering mechanism.
+While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextpilot2025}) has explored cache-aware document scheduling, our contribution is to demonstrate that a \emph{minimal, engine-agnostic} implementation---with near-optimal greedy guarantees (99.7\% of oracle) and online adaptivity---achieves competitive latency reductions (20--33\%) without the complexity of engine-level modifications. We additionally describe a retrieval-inference pipelining optimization as a secondary, orthogonal contribution.
 
-We evaluate RAGCache++ on two GPU configurations (RTX 4060~Ti and RTX 4090) as independent case studies with different model sizes (1.5B and 7B). Note that these configurations differ in vLLM version, corpus size, and model---only \emph{within-device} strategy comparisons should be interpreted. An overlap sensitivity sweep characterizes the conditions under which ordering helps most, and a HotpotQA sanity check found no evidence of quality regression.
+We evaluate on two GPU configurations, four model sizes across two architectures, four workloads with varying overlap, and show that simple prompt-layer ordering captures most of the available APC benefit.
 
 % ================================================================
 \section{Background}
@@ -205,11 +205,19 @@ Concretely, APC identifies reusable prefix blocks using block-level hashing over
 
 \subsection{Related Work}
 
-\textbf{RAGCache}~\citep{jin2025ragcache} organizes cached KV states in a knowledge tree indexed by document sequences and uses a PGDSF replacement policy with multi-tier placement across GPU and host memory, achieving up to 4$\times$ TTFT reduction. RAGCache modifies the serving engine internals to implement custom cache management. Our work is complementary: we achieve document-ordering optimization \emph{without} engine modifications, using the engine's built-in APC.
+The observation that document ordering affects prefix cache reuse in RAG systems is well-established. Several concurrent and prior systems address this from different angles; we position our work within this landscape.
 
-\textbf{CacheBlend}~\citep{yao2025cacheblend} enables non-prefix KV reuse by selectively recomputing ${\sim}15\%$ of tokens per layer, achieving 2.2--3.3$\times$ TTFT reduction. CacheBlend addresses the harder problem of reusing KV blocks in arbitrary positions, while our approach converts the problem to pure prefix reuse via ordering.
+\textbf{RAGCache}~\citep{jin2025ragcache} is the closest prior work. It organizes cached KV states in a knowledge tree indexed by document sequences, uses a PGDSF replacement policy with multi-tier placement, and includes cache-aware \emph{request-level} scheduling and dynamic speculative pipelining. RAGCache modifies the serving engine internals. Our work shares the knowledge-tree concept but differs in scope: we perform \emph{intra-prompt} document reordering at the prompt-construction layer without any engine modification. Our proxy-baseline experiments (Table~\ref{tab:baselines}) show that both approaches achieve similar latency reductions (27--30\%), validating that the scheduling abstraction---not the specific implementation---is the key mechanism.
 
-\textbf{CacheGen}~\citep{lmcache2024} compresses KV caches for efficient storage and streaming, reducing memory footprint. This is orthogonal to our ordering optimization.
+\textbf{ContextPilot}~\citep{contextpilot2025} is a concurrent system that also reorders context blocks to maximize KV-cache reuse, using a context index and de-duplication techniques. Like our work, it operates at the prompt layer with negligible overhead (${\sim}$0.047\,ms). Our approach differs in using a trie-based greedy algorithm with formal near-optimality guarantees (99.7\% of oracle), online adaptivity under distribution shift, and comprehensive evaluation across architectures and workloads. The convergence of these independent efforts validates the importance of cache-aware ordering as a systems abstraction.
+
+\textbf{Cache-Craft}~\citep{cachecraft2025} reports that in production RAG workloads, exact prefix caching applies to only ${\sim}$8\% of requests because retrieved chunks and their ordering vary across queries. Their solution identifies reusable chunk-caches and selectively recomputes the rest. This production finding directly motivates our work: we aim to \emph{increase} the fraction of prefix-cacheable requests by aligning document ordering with cached prefixes.
+
+\textbf{TurboRAG}~\citep{turborag2024} goes beyond strict ordering constraints by pre-computing chunk-level KV caches offline and stitching them at inference via reordered-RoPE, enabling reuse even when document order differs. This represents a complementary direction: TurboRAG relaxes the prefix constraint at the attention level, while we maximize reuse \emph{within} the prefix constraint via ordering.
+
+\textbf{CacheBlend}~\citep{yao2025cacheblend} enables non-prefix KV reuse by selectively recomputing ${\sim}$15\% of tokens per layer. Like TurboRAG, it addresses the harder problem of position-independent reuse; our approach converts the problem to pure prefix reuse via ordering, which is simpler but sufficient when document overlap is moderate.
+
+\textbf{CacheGen}~\citep{lmcache2024} compresses KV caches for efficient storage and streaming. This is orthogonal to ordering optimization.
 
 % ================================================================
 \section{Methodology}
