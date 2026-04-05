@@ -1,0 +1,41 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true,
+    "num_queries": 200,
+    "overlap": 0.6
+  },
+  "timestamp": "2026-04-05 11:47:27",
+  "feedback_loop": {
+    "stale_trie": {
+      "n": 200,
+      "p50_ms": 41.81,
+      "p95_ms": 117.54,
+      "p99_ms": 121.17,
+      "mean_ms": 53.45,
+      "std_ms": 25.5,
+      "mismatches_observed": 1,
+      "prediction_accuracy": 0.995
+    },
+    "feedback_proxy": {
+      "n": 200,
+      "p50_ms": 42.01,
+      "p95_ms": 116.99,
+      "p99_ms": 119.89,
+      "mean_ms": 53.64,
+      "std_ms": 24.85,
+      "mismatches_observed": 1,
+      "prediction_accuracy": 0.995,
+      "pruned_paths": 1
+    },
+    "comparison": {
+      "stale_mismatches": 1,
+      "feedback_mismatches": 1,
+      "mismatch_reduction": 0.0,
+      "stale_accuracy": 0.995,
+      "feedback_accuracy": 0.995
+    }
+  }
+}
