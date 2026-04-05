@@ -1,6 +1,6 @@
 # RAGCache++
 
-**Prefix-Aware Document Ordering for KV Cache Reuse in RAG Systems**
+**Cache-Aware Document Ordering for Low-Latency RAG Serving**
 
 CMU 11-868 Large Language Model Systems (Spring 2026) Final Project
 
@@ -107,7 +107,7 @@ python -m ragcache_pp.vllm_integration.benchmark_reviewer \
 
 ```bibtex
 @misc{ragcacheplusplus2026,
-  title   = {RAGCache++: Prefix-Aware Document Ordering for KV Cache Reuse in RAG Systems},
+  title   = {RAGCache++: Cache-Aware Document Ordering for Low-Latency RAG Serving},
   author  = {Kaizhen Tang},
   year    = {2026},
   note    = {CMU 11-868 LLM Systems, Spring 2026}
