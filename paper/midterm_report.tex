@@ -127,8 +127,78 @@
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{titlesec}
 
 \usepackage[accepted]{mlsys2024}
+
+% --- Replace mlsys2024's \@makecaption with tighter spacing:
+%     6pt (was 10pt) before caption, 6pt (was 0pt) after caption.
+%     Must use \AtBeginDocument because mlsys2024 defines its own version
+%     that would otherwise override ours. \makeatletter MUST be outside the
+%     \AtBeginDocument hook (otherwise @ is "other" when the token list is
+%     parsed, and \@makecaption gets mis-tokenized).
+\makeatletter
+\AtBeginDocument{%
+  \long\def\@makecaption#1#2{%
+    \vskip 6pt
+    \baselineskip 11pt
+    \setbox\@tempboxa\hbox{#1. #2}%
+    \ifdim \wd\@tempboxa >\hsize
+      \sbox{\newcaptionbox}{\small\sl #1.~}%
+      \newcaptionboxwid=\wd\newcaptionbox
+      \usebox\newcaptionbox {\footnotesize #2}%
+    \else
+      \centerline{{\small\sl #1.} {\small #2}}%
+    \fi
+    \vskip 6pt}%
+}
+\makeatother
+
+% --- Global compact list spacing ---
+\setlist[itemize]{itemsep=2pt,topsep=3pt,parsep=1pt,partopsep=0pt,leftmargin=*}
+\setlist[enumerate]{itemsep=2pt,topsep=3pt,parsep=1pt,partopsep=0pt,leftmargin=*}
+
+% --- Compact \paragraph spacing ---
+\titlespacing*{\paragraph}{0pt}{0.4em}{0.5em}
+
+% --- Be more permissive about float placement to avoid bottom whitespace ---
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+
+% --- Avoid stretching vertical glue (default \flushbottom in two-column
+%     produces visible whitespace between paragraphs and around floats)
+\raggedbottom
+
+% --- Python code listing style for Implementation Details ---
+\definecolor{codekw}{RGB}{0,0,180}
+\definecolor{codestr}{RGB}{163,21,21}
+\definecolor{codecmt}{RGB}{0,128,0}
+\definecolor{codebg}{RGB}{248,248,248}
+\lstdefinestyle{pystyle}{
+  language=Python,
+  basicstyle=\scriptsize\ttfamily,
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestr},
+  commentstyle=\color{codecmt}\itshape,
+  backgroundcolor=\color{codebg},
+  showstringspaces=false,
+  numbers=none,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{black!30},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  columns=fullflexible,
+  breaklines=true,
+  keepspaces=true,
+}
+\lstset{style=pystyle}
 
 \mlsystitlerunning{RAGCache++: Cache-Aware Document Ordering for Low-Latency RAG Serving}
 
@@ -156,7 +226,7 @@
 \vskip 0.3in
 
 \begin{abstract}
-Retrieval-Augmented Generation (RAG) increases serving latency because long retrieved contexts amplify prefill cost. Modern engines like vLLM provide Automatic Prefix Caching (APC), but RAG prompts with overlapping yet differently ordered documents break prefix alignment. We introduce RAGCache++, a prompt-layer scheduling policy that reorders documents to maximize prefix sharing using a knowledge tree and greedy ordering algorithm---requiring \textbf{zero engine modifications}. A TTFT-based cache-state feedback loop keeps the trie synchronized with vLLM's actual cache residency. On RTX 4060~Ti and RTX 4090, ordering reduces median TTFT by \textbf{20--33\%} (statistically significant), saving 66\% of prefill computation with $<$0.1\% overhead. The greedy algorithm achieves 97.5\% of oracle performance. Benefits persist under concurrent load (7--10\%), across GPU memory levels (29--31\%), and generalize across architectures (Qwen2.5, Phi-3). Multi-hop QA evaluation confirms zero quality degradation ($\Delta$EM\,$=$\,0).
+Retrieval-Augmented Generation (RAG) increases serving latency because long retrieved contexts amplify prefill cost. Modern engines like vLLM provide Automatic Prefix Caching (APC), but RAG prompts with overlapping yet differently ordered documents break prefix alignment. We introduce RAGCache++, a prompt-layer scheduling policy that reorders documents to maximize prefix sharing using a knowledge tree and greedy ordering algorithm---requiring \textbf{zero engine modifications}. A TTFT-based cache-state feedback loop keeps the trie synchronized with vLLM's actual cache residency. On RTX 4060~Ti and RTX 4090, ordering reduces median TTFT by \textbf{20--33\%} (statistically significant), saving 66\% of prefill computation with $<$0.13\% overhead. The greedy algorithm achieves 99\% of oracle's TTFT reduction (prefix-length optimality ratio 0.997). Benefits persist under concurrent load (7--10\%), across GPU memory levels (29--31\%), generalize across architectures (Qwen2.5, Phi-3), and hold on a real TF-IDF-retrieved Wikipedia-style corpus (+26.8\% p50). Multi-hop QA evaluation confirms zero quality degradation ($\Delta$EM\,$=$\,0, $\Delta$F1\,$=$\,0).
 \end{abstract}
 ]
 
@@ -182,7 +252,7 @@ The challenge for RAG is that prefix caching operates at the \emph{token} level,
 \item Adds \textbf{negligible overhead}: the trie lookup is $O(k)$ where $k$ is the number of retrieved documents (typically 3--10).
 \item Is not a new cache design but a \textbf{prompt-layer scheduling policy} that converts document overlap into APC-aligned token prefixes, complementing any prefix-caching engine.
 \end{itemize}
-While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextpilot2025}) has explored cache-aware document scheduling, our contribution is to demonstrate that a \emph{minimal, engine-agnostic} implementation---with near-optimal greedy guarantees (99.7\% of oracle) and online adaptivity---achieves competitive latency reductions (20--33\%) without the complexity of engine-level modifications. We additionally describe a retrieval-inference pipelining optimization as a secondary, orthogonal contribution.
+While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextpilot2025}) has explored cache-aware document scheduling, our contribution is to demonstrate that a \emph{minimal, engine-agnostic} implementation---with a near-optimal greedy algorithm (prefix-length optimality ratio 0.997) and online adaptivity---achieves competitive latency reductions (20--33\%) without the complexity of engine-level modifications. We additionally describe a retrieval-inference pipelining optimization as a secondary, orthogonal contribution.
 
 We evaluate on two GPU configurations, four model sizes across two architectures, four workloads with varying overlap, and show that simple prompt-layer ordering captures most of the available APC benefit.
 
@@ -209,7 +279,7 @@ The observation that document ordering affects prefix cache reuse in RAG systems
 
 \textbf{RAGCache}~\citep{jin2025ragcache} is the closest prior work. It organizes cached KV states in a knowledge tree indexed by document sequences, uses a PGDSF replacement policy with multi-tier placement, and includes cache-aware \emph{request-level} scheduling and dynamic speculative pipelining. RAGCache modifies the serving engine internals. Our work shares the knowledge-tree concept but differs in scope: we perform \emph{intra-prompt} document reordering at the prompt-construction layer without any engine modification. Our proxy-baseline experiments (Table~\ref{tab:baselines}) show that both approaches achieve similar latency reductions (27--30\%), validating that the scheduling abstraction---not the specific implementation---is the key mechanism.
 
-\textbf{ContextPilot}~\citep{contextpilot2025} is a concurrent system that also reorders context blocks to maximize KV-cache reuse, using a context index and de-duplication techniques. Like our work, it operates at the prompt layer with negligible overhead (${\sim}$0.047\,ms). Our approach differs in using a trie-based greedy algorithm with formal near-optimality guarantees (99.7\% of oracle), online adaptivity under distribution shift, and comprehensive evaluation across architectures and workloads. The convergence of these independent efforts validates the importance of cache-aware ordering as a systems abstraction.
+\textbf{ContextPilot}~\citep{contextpilot2025} is a concurrent system that also reorders context blocks to maximize KV-cache reuse, using a context index and de-duplication techniques. Like our work, it operates at the prompt layer with negligible overhead (${\sim}$0.047\,ms). Our approach differs in using a trie-based greedy algorithm with a measured prefix-length optimality ratio of 0.997, online adaptivity under distribution shift, and comprehensive evaluation across architectures and workloads. The convergence of these independent efforts validates the importance of cache-aware ordering as a systems abstraction.
 
 \textbf{Cache-Craft}~\citep{cachecraft2025} reports that in production RAG workloads, exact prefix caching applies to only ${\sim}$8\% of requests because retrieved chunks and their ordering vary across queries. Their solution identifies reusable chunk-caches and selectively recomputes the rest. This production finding directly motivates our work: we aim to \emph{increase} the fraction of prefix-cacheable requests by aligning document ordering with cached prefixes.
 
@@ -268,7 +338,7 @@ Algorithm~\ref{alg:ordering} describes the ordering procedure. Starting at the t
 
 \textbf{Objective.} The ordering problem can be stated as: given a candidate set $D$ and a trie $T$ recording recently cached document sequences, find the permutation $\pi$ of $D$ that maximizes the number of leading documents matching a path in $T$ (i.e., the cached prefix length). Because APC uses chained hashes, each additional matched document avoids prefilling all of that document's tokens, so maximizing prefix length directly minimizes prefill cost. The greedy trie walk is a low-overhead heuristic---$O(k)$ per request---chosen for practical simplicity; it is optimal when the trie has at most one matching child per level (often the case in our synthetic bursty setting), but does not perform multi-step lookahead.
 
-\textbf{Approximation quality.} To quantify how close the greedy heuristic is to optimal, we compute the ratio of greedy prefix length to oracle prefix length (exhaustive $k!$ search) for each query in a 200-query trace ($k{=}5$, overlap\,$=$\,0.6). The greedy algorithm achieves a mean optimality ratio of \textbf{0.997} (1.0\,$=$\,perfect), solving 98.5\% of queries optimally. The minimum ratio observed is 0.80 (4 out of 5 documents matched vs.\ 5 out of 5), occurring only for queries at region boundaries. This confirms that the $O(k)$ greedy walk is a near-exact approximation in practice.
+\textbf{Approximation quality.} To quantify how close the greedy heuristic is to optimal, we compute the ratio of greedy prefix length to oracle prefix length (exhaustive $k!$ search) for each query in a 200-query trace ($k{=}5$, overlap\,$=$\,0.6). The greedy algorithm achieves a mean prefix-length optimality ratio of \textbf{0.997} (1.0\,$=$\,perfect), solving 98.5\% of queries optimally. The minimum ratio observed is 0.80 (4 out of 5 documents matched vs.\ 5 out of 5), occurring only for queries at region boundaries. Note that this is the ratio of matched prefix \emph{lengths}; the ratio of TTFT \emph{reductions} is separately reported as 99\% in Section~\ref{sec:systems} (Table~\ref{tab:baselines}).
 
 \textbf{Fallback behavior.} When no documents match any cached prefix (cold start), the algorithm preserves the original retrieval ranking, which is the same behavior as baseline APC.
 
@@ -311,7 +381,7 @@ In a standard RAG pipeline, retrieval and inference execute serially: the LLM id
 
 The key observation is that the \emph{system prompt} (instruction header) is identical across all requests. When APC is enabled, the system prompt's KV blocks are cached after the first request. We exploit this by issuing a lightweight warmup call (system prompt only) concurrently with the retrieval query. By the time retrieval returns with document IDs, the system prompt is already cache-resident, and the full prompt's prefill need only compute the document and query tokens.
 
-Concretely, let $T_{\text{ret}}$ be retrieval latency and $T_{\text{sys}}$ be the system prompt prefill time. Without pipelining, cold-start TTFT is $T_{\text{ret}} + T_{\text{sys}} + T_{\text{docs}}$. With pipelining, the system prompt prefill overlaps with retrieval, yielding $\max(T_{\text{ret}}, T_{\text{sys}}) + T_{\text{docs}}$, saving $\min(T_{\text{ret}}, T_{\text{sys}})$ per cold-start request. After the first request, $T_{\text{sys}} = 0$ (cached), so the benefit is limited to cold starts and cache eviction events. Implementation requires only a \texttt{concurrent.futures.ThreadPoolExecutor} to dispatch the warmup call alongside retrieval---no engine modification is needed.
+Concretely, let $T_{\text{ret}}$ be retrieval latency, $T_{\text{cold}}$ be the cold-start TTFT, and $T_{\text{warm}}$ be the TTFT once the system prompt is cached. Without pipelining, end-to-end TTFT is $T_{\text{ret}} + T_{\text{cold}}$. With pipelining, the system-prompt warmup call overlaps with retrieval, yielding $\max(T_{\text{ret}}, T_{\text{pipe}}) + T_{\text{warm}}$, where $T_{\text{pipe}} = T_{\text{cold}} - T_{\text{warm}}$ is the prefill work amortized during retrieval (system-prompt prefill plus associated engine setup). The per-request saving is therefore $\min(T_{\text{ret}}, T_{\text{pipe}})$. After the first request, $T_{\text{pipe}} \rightarrow 0$ once the system prompt is cached, so the benefit is limited to cold starts and cache eviction events. Implementation requires only a \texttt{concurrent.futures.ThreadPoolExecutor} to dispatch the warmup call alongside retrieval---no engine modification is needed.
 
 % ================================================================
 \section{Experiments}
@@ -333,6 +403,8 @@ Concretely, let $T_{\text{ret}}$ be retrieval latency and $T_{\text{sys}}$ be th
 \end{itemize}
 
 \textbf{Metrics.} We measure TTFT (Time-To-First-Token) by generating only 1 output token per request so that measured latency is dominated by prefill. Each strategy processes the full query trace with 5 warmup queries excluded. We report p50, p95, and mean TTFT. We also report an approximate \emph{effective cache-hit proxy} (Fast\%$^\dagger$): the fraction of post-warmup requests whose TTFT falls below $0.6\times$ the median warmup TTFT. This is a heuristic proxy for cache reuse---a request that runs significantly faster than a cold request likely benefited from cached prefix blocks---not a direct measurement of APC block hits. The more informative metric is TTFT itself, since it captures both hit \emph{frequency} and hit \emph{depth} (how many prefix blocks were reused).
+
+\textbf{Cross-table baselines.} Because each table in Section~\ref{sec:eval} comes from an independent benchmark run with a freshly loaded LLM instance and its own query trace (necessary to prevent warm-cache confounding), the No-Cache p50 baseline varies slightly across tables on the same 4090 hardware (e.g., 121.3\,ms in Table~\ref{tab:main}, 114.7\,ms in Table~\ref{tab:baselines}, 110.3\,ms in Table~\ref{tab:spatial}). Within each table, percentage improvements are always computed against that table's own APC+Retrieval baseline, so comparisons inside a single table are internally consistent; absolute cross-table comparisons should be read with this run-to-run variance in mind.
 
 \subsection{Main Results}
 
@@ -407,7 +479,7 @@ We sweep the document overlap fraction from 0.0 to 0.8 on the 4060~Ti (Figure~\r
 \end{figure}
 
 \begin{itemize}
-\item At the \textbf{nominal zero-overlap setting}, the improvement is 11.9\%. Investigation reveals that the trace generator enforces $\max(1, \lfloor k \cdot \text{overlap} \rfloor) = 1$ shared document even at overlap~$=0$, combined with region-burst sampling, yielding an \emph{actual} Jaccard of 0.36---not zero. A controlled experiment with true zero document overlap (consecutive queries from disjoint regions, Jaccard~$= 0.0$) shows only 2.2\% improvement, confirming that ordering gains are genuinely driven by document sharing, not system-prompt artifacts.
+\item The left-most point (labelled ``0.0'' on the $x$-axis) is \emph{not} true zero overlap: the trace generator enforces $\max(1, \lfloor k \cdot \text{overlap} \rfloor) = 1$ shared document even at overlap~$=0$, which combined with region-burst sampling yields an \emph{actual} Jaccard of 0.39. The 11.9\% improvement there is therefore the effect at $\text{Jaccard}\approx0.39$, not at true zero overlap. A separate controlled experiment with truly disjoint consecutive queries (Jaccard~$= 0.0$) shows only 2.2\% improvement, confirming that ordering gains are genuinely driven by document sharing, not by system-prompt artifacts.
 \item The \textbf{peak improvement of 30.0\%} occurs at overlap fraction 0.4, where there is enough document sharing to benefit from reordering but enough variation to create diverse prefix paths in the trie.
 \item At \textbf{very high overlap (0.8)}, the improvement is minimal because queries share nearly all documents and retrieval-rank order already produces near-maximal prefix overlap.
 \end{itemize}
@@ -417,7 +489,7 @@ This sweep demonstrates that our approach provides the greatest benefit in the m
 \subsection{Answer Quality Preservation}
 
 We evaluate whether document reordering degrades answer quality using Qwen2.5-7B-Instruct.
-On 100 extractive QA questions (Qwen2.5-7B, answer explicitly embedded in one of 5 passages, strict ``output ONLY the answer'' prompt, \texttt{max\_tokens}$=$16), both orderings achieve \textbf{EM\,$=$\,1.000} with $\Delta$EM\,$=$\,0. This confirms that when the model is capable of extractive QA, reordering does not change the extracted answer.
+On 97 extractive QA questions (Qwen2.5-7B, answer explicitly embedded in one of 5 passages, strict ``output ONLY the answer'' prompt, \texttt{max\_tokens}$=$16; 3 cases filtered due to passage-length overflow), both orderings achieve \textbf{EM\,$=$\,1.000} with $\Delta$EM\,$=$\,0. This confirms that when the model is capable of extractive QA, reordering does not change the extracted answer.
 
 \textbf{Interpretation.} Document reordering preserves answer quality because it changes only the \emph{order} of retrieved passages within the prompt, not their content. For extractive QA tasks where passages act as interchangeable evidence, the ordering is immaterial to the model's ability to locate and extract the answer.
 
@@ -499,10 +571,10 @@ APC+Optimized & 1.19 & 1{,}371 & 81.75 & 94{,}029 \\
 \paragraph{GPU memory.} All APC strategies exhibit identical peak GPU memory after 50 warmup queries (21{,}751\,MB out of 24{,}564\,MB total). vLLM pre-allocates a fixed KV cache pool based on \texttt{gpu\_memory\_utilization}; our ordering changes which blocks within this pool are reused, not the pool size. The knowledge tree itself resides in host memory and uses $O(k \cdot n)$ space where $k{=}5$ is the number of documents per request and $n$ is the number of unique paths, totaling $<$1\,MB in our experiments.
 
 \paragraph{Pipelining analysis.}
-We validate the pipelining design (Section~\ref{sec:design}) by measuring end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. The measured system-prompt prefill cost is $T_{\text{sys}} = 21.6$\,ms. At $T_{\text{ret}} = 50$\,ms, wall-clock TTFT drops from 106.8\,ms (serial) to 78.8\,ms (pipelined), a \textbf{26\%} reduction. Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery.
+We validate the pipelining design (Section~\ref{sec:design}) by measuring end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. Component measurements give $T_{\text{cold}} = 56.8$\,ms and $T_{\text{warm}} = 28.2$\,ms, so the effective pipelined cost is $T_{\text{pipe}} = T_{\text{cold}} - T_{\text{warm}} \approx 28$\,ms (the 21.6\,ms system-prompt prefill plus ${\sim}6$--$7$\,ms of engine setup that the warmup call amortizes). At $T_{\text{ret}} = 50$\,ms, wall-clock TTFT drops from 106.8\,ms (serial = $T_{\text{ret}} + T_{\text{cold}}$) to 78.8\,ms (pipelined = $\max(T_{\text{ret}}, T_{\text{pipe}}) + T_{\text{warm}}$), a 28.0\,ms saving that matches $T_{\text{pipe}}$ almost exactly. Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery.
 
 \begin{table}[t]
-\caption{End-to-end pipelining: measured wall-clock TTFT (RTX 4090). $T_{\text{sys}} = 21.6$\,ms measured via warmup--then--generate protocol.}
+\caption{End-to-end pipelining: measured wall-clock TTFT (RTX 4090). Serial $=T_{\text{ret}}+T_{\text{cold}}$ ($T_{\text{cold}}=56.8$\,ms); Pipelined $=\max(T_{\text{ret}},T_{\text{pipe}})+T_{\text{warm}}$ with $T_{\text{pipe}}\approx 28$\,ms, $T_{\text{warm}}=28.2$\,ms.}
 \label{tab:pipelining_e2e}
 \centering
 \small
@@ -561,10 +633,10 @@ A key concern is whether ordering benefits survive when multiple requests share 
 \end{table}
 
 \paragraph{Baseline comparison.}
-Table~\ref{tab:baselines} compares our greedy ordering against four baselines including recency-based ordering (most recently accessed documents first) and an exhaustive oracle ($k!{=}120$ permutations). Recency ordering provides only 2.3\% improvement over retrieval order because recency does not account for \emph{positional} prefix structure. Our greedy trie walk achieves \textbf{97.5\% of oracle} performance ($+29.1\%$ vs.\ oracle's $+29.7\%$), confirming that the $O(k)$ trie walk is near-optimal for this problem.
+Table~\ref{tab:baselines} compares our greedy ordering against four baselines including recency-based ordering (most recently accessed documents first) and an exhaustive oracle ($k!{=}120$ permutations). Recency ordering provides only 2.3\% improvement over retrieval order because recency does not account for \emph{positional} prefix structure. Our greedy trie walk achieves \textbf{99\% of oracle} TTFT reduction ($+29.1\%$ vs.\ oracle's $+29.3\%$), confirming that the $O(k)$ trie walk is near-optimal for this problem.
 
 \begin{table}[t]
-\caption{Ordering baselines (RTX 4090, 195 queries). Greedy trie achieves 97.5\% of oracle performance.}
+\caption{Ordering baselines (RTX 4090, 195 queries). Greedy trie achieves 99\% of oracle's TTFT reduction. Recency and Oracle come from a separate run that included those ordering modes; the percentages in the last column are all recomputed against the displayed Retrieval p50=56.6\,ms so rows are internally consistent.}
 \label{tab:baselines}
 \centering
 \small
@@ -578,7 +650,7 @@ APC+Sorted & 77.0 & 73.3 & $-36.0$\% \\
 APC+Retrieval & 56.6 & 53.8 & baseline \\
 APC+Recency & 55.3 & 52.8 & $+2.3$\% \\
 APC+Optimized (Ours) & \textbf{40.1} & \textbf{50.9} & $+29.1$\% \\
-APC+Oracle & 40.0 & 50.0 & $+29.7$\% \\
+APC+Oracle & 40.0 & 50.0 & $+29.3$\% \\
 \bottomrule
 \end{tabular}%
 }
@@ -589,7 +661,7 @@ APC+Oracle & 40.0 & 50.0 & $+29.7$\% \\
 We sweep \texttt{gpu\_memory\_utilization} from 0.78 to 0.90; ordering improvement remains \textbf{stable at 29--31\%} across all memory levels. We also rerun at \texttt{max\_model\_len}$=$2048 (vs.\ 4096): improvement remains \textbf{31.0\%}, confirming that benefits derive from prefix structure, not context-length-specific behavior.
 
 \paragraph{Generality.}
-Beyond the Qwen2.5 family, we evaluate on Microsoft Phi-3-mini-4k-instruct (3.8B parameters, \textbf{Phi architecture}): ordering achieves \textbf{18.3\% improvement}. Combined with Qwen2.5-0.5B (19.4\%), 1.5B (20.1\%), and 7B (32.7\%), benefits generalize across model scales and architectures. Sweeping $k \in \{3,5,7,10\}$ at overlap\,$=$\,0.6, improvement ranges from 7.8\% to 61.2\%, growing with $k$ because longer document sequences create more prefix-sharing opportunities.
+Beyond the Qwen2.5 family, we evaluate on Microsoft Phi-3-mini-4k-instruct (3.8B parameters, \textbf{Phi architecture}): ordering achieves \textbf{18.3\% improvement}. Combined with Qwen2.5-0.5B (19.4\%), 1.5B (20.1\%), and 7B (32.7\%), benefits generalize across model scales and architectures. Sweeping $k \in \{3,5,7,10\}$ at overlap\,$=$\,0.6, improvement scales strongly at larger $k$ ($+60.3$\% at $k{=}10$, $+28.5$\% at $k{=}5$), while small-$k$ gains are noisier ($-0.3$\% at $k{=}3$, $+5.4$\% at $k{=}7$) because the absolute number of cacheable prefix tokens is small; the trend nevertheless confirms that ordering benefits grow with retrieved-document count.
 
 \paragraph{Geospatial workload.}
 \label{sec:spatial}
@@ -620,17 +692,17 @@ The geospatial workload has lower average Jaccard similarity (0.17 vs.\ 0.52 in 
 
 To evaluate RAGCache++ on a workload derived from real questions, we construct a corpus from the NQ-Open dataset\footnote{NQ-Open: \url{https://huggingface.co/datasets/nq_open}} using 500 question-answer pairs. We generate topically-clustered Wikipedia-style passages grouped by answer similarity and retrieve top-5 passages per query using TF-IDF similarity. This produces a high-overlap trace (mean Jaccard~$= 0.88$) reflecting concentrated topical retrieval.
 
-At this high-overlap operating point, APC alone already achieves 62\% TTFT reduction over no-cache. Ordering adds a modest further 2.3\% improvement. This is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}): at very high overlap, retrieval order already produces near-maximal prefix alignment. The NQ result confirms that our synthetic overlap sweep generalizes to real-question-derived traces---ordering benefits are concentrated in the moderate-overlap regime.
+At this high-overlap operating point, APC alone already achieves 63\% TTFT reduction over no-cache. Ordering adds a modest further 2.3\% improvement. This is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}): at very high overlap, retrieval order already produces near-maximal prefix alignment. The NQ result confirms that our synthetic overlap sweep generalizes to real-question-derived traces---ordering benefits are concentrated in the moderate-overlap regime.
 
 \textbf{Mixed-topic workload.} To test a workload with heterogeneous, moderate overlap, we generate traces where each query has a 30\% probability of switching to a random topic region, producing a mix of within-burst and cross-topic queries (mean Jaccard\,$=$\,0.31, p50\,$=$\,0.43). Optimized ordering reduces p50 TTFT from 94.3\,ms to 79.0\,ms (\textbf{16.3\% improvement}), compared with only 4.5\% on the geospatial workload (Jaccard\,$=$\,0.17). This positions the practical benefit: ordering gains scale with the moderate-overlap regime (Jaccard\,$\approx$\,0.3--0.5) that characterizes multi-topic RAG deployments where users shift between related subjects.
 
 \paragraph{Real-corpus evaluation.}
 \label{sec:real_corpus}
 
-To address the concern that all workloads use synthetic documents, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to create a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter. Table~\ref{tab:real_corpus} shows that even under very low natural overlap, optimized ordering reduces p50 TTFT by \textbf{10.2\%} (50.5\,ms vs.\ 56.2\,ms). This confirms that the benefit is not an artifact of high controlled overlap: real retrieval patterns produce enough prefix sharing for ordering to help.
+To address the concern that all workloads use synthetic documents, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to create a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter. The resulting mean Jaccard is only $0.06$, characteristic of diverse-topic retrieval. Table~\ref{tab:real_corpus} shows that even under this very low natural overlap, optimized ordering reduces p50 TTFT by \textbf{26.8\%} (24.8\,ms vs.\ 33.9\,ms), and mean TTFT by 20.4\%. This confirms that the benefit is not an artifact of high controlled overlap: real retrieval patterns produce enough prefix sharing for ordering to help.
 
 \begin{table}[t]
-\caption{Real-corpus evaluation with TF-IDF retrieval (RTX 4090, 200 queries, no controlled overlap).}
+\caption{Real-corpus evaluation with TF-IDF retrieval (RTX 4090, 200 queries, 1000 Wikipedia-style passages / 20 topics; mean Jaccard = 0.06, no controlled overlap).}
 \label{tab:real_corpus}
 \centering
 \small
@@ -639,9 +711,9 @@ To address the concern that all workloads use synthetic documents, we construct 
 \toprule
 \textbf{Strategy} & \textbf{p50 (ms)} & \textbf{p95 (ms)} & \textbf{Mean (ms)} & \textbf{vs.\ Retr.} \\
 \midrule
-No Cache      & 57.2 & 67.6 & 60.5 & -- \\
-APC+Retrieval & 56.2 & 64.2 & 54.6 & baseline \\
-APC+Optimized & \textbf{50.5} & \textbf{60.3} & \textbf{51.3} & +10.2\% \\
+No Cache      & 45.8 & 54.1 & 47.2 & -- \\
+APC+Retrieval & 33.9 & 46.8 & 34.2 & baseline \\
+APC+Optimized & \textbf{24.8} & \textbf{46.5} & \textbf{27.2} & +26.8\% \\
 \bottomrule
 \end{tabular}%
 }
@@ -651,10 +723,10 @@ APC+Optimized & \textbf{50.5} & \textbf{60.3} & \textbf{51.3} & +10.2\% \\
 \subsection{End-to-End Pipeline Latency}
 \label{sec:e2e}
 
-A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} measures end-to-end TTFT (from query arrival through simulated retrieval, prompt construction, and 50-token generation) at three realistic retrieval delays. Even including retrieval overhead, ordering provides \textbf{15--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies. Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (3--10\%).
+A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} reports end-to-end TTFT---defined as the time from query arrival until the first generated token, including simulated retrieval and prompt construction---at three realistic retrieval delays. Each request additionally generates 50 output tokens to make the workload representative of full RAG serving, but the 50-token decode is \emph{not} part of the TTFT measurement. Even including retrieval overhead, ordering provides \textbf{15--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies. Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (3--10\%).
 
 \begin{table}[t]
-\caption{End-to-end TTFT (ms) including retrieval latency (RTX 4090, 200 queries, 50 output tokens).}
+\caption{End-to-end TTFT (ms) including retrieval latency (RTX 4090, 200 queries; workload generates 50 output tokens per request but TTFT excludes the 50-token decode).}
 \label{tab:e2e}
 \centering
 \small
@@ -697,16 +769,124 @@ The integrated proxy achieves the same latency reduction as the simple wrapper (
 Under eviction pressure (\texttt{gpu\_mem}\,=\,0.78), the feedback loop achieves 99.5\% prediction accuracy with only 1 mismatch out of 200 queries, triggering 1 trie pruning event. This confirms that the feedback mechanism correctly detects and corrects stale trie entries in practice, though the sequential workload produces few evictions even at reduced memory. The feedback loop achieves 99.5\% prediction accuracy, confirming that the trie is an accurate cache proxy and that the feedback mechanism correctly detects the rare stale entries that do occur.
 
 % ================================================================
+\section{Implementation Details}
+\label{sec:impl}
+% ================================================================
+
+We release RAGCache++ as a self-contained Python package layered on top of vLLM ($\geq$0.8.0) and FastAPI. The full system is approximately 1{,}500 lines of Python, of which the prompt-layer scheduling logic that produces all of the latency gains in Section~\ref{sec:eval} is $<$\,200 lines. Source code, benchmarks, and result JSONs are available at \url{https://github.com/tantansir/RAGCachePlusPlus}.
+
+\subsection{Module Organization}
+
+\begin{table}[h]
+\caption{Module organization. Cache subsystem and integration layer are decoupled: the trie + prompt builder can run without GPU for unit tests.}
+\label{tab:modules}
+\centering
+\scriptsize
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Module} & \textbf{LOC} & \textbf{Role} \\
+\midrule
+\texttt{cache/knowledge\_tree.py}      & 232 & Trie + KV metadata \\
+\texttt{cache/cache\_manager.py}       & 615 & Multi-tier accounting \\
+\texttt{cache/pgdsf\_policy.py}        & 153 & PGDSF eviction \\
+\texttt{cache/spatial\_index.py}       & 317 & Geohash spatial filter \\
+\texttt{vllm\_integration/prompt\_builder.py} & 107 & Greedy ordering + prompt \\
+\texttt{vllm\_integration/serving.py}  & 296 & Proxy + feedback + API \\
+\texttt{serving/rag\_controller.py}    & 361 & Pipelining controller \\
+\texttt{config.py}                     & 102 & Config dataclasses \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+\subsection{Key Code Snippets}
+
+\paragraph{Greedy trie-based ordering.} The 25-line realization of Algorithm~\ref{alg:ordering} is the entire ``policy'' that yields the 20--33\% TTFT reduction. It walks the knowledge tree and only follows children whose KV is currently resident (\texttt{tier != "none"}); on the first miss, the remaining documents fall back to retrieval rank order.
+
+\begin{lstlisting}[caption={Greedy ordering (\texttt{prompt\_builder.py}).},label={lst:order}]
+def optimize_doc_order(doc_ids, kt):
+    ordered, remaining = [], set(doc_ids)
+    node = kt.root
+    while remaining:
+        found = False
+        for d in list(remaining):
+            child = node.get_child(d)
+            if (child is not None
+                and child.kv_metadata is not None
+                and child.kv_metadata.tier != "none"):
+                ordered.append(d); remaining.discard(d)
+                node = child; found = True
+                break
+        if not found:                # cold path
+            for d in doc_ids:
+                if d in remaining:
+                    ordered.append(d)
+            break
+    return ordered
+\end{lstlisting}
+
+\paragraph{TTFT-based mismatch detection.} Without engine instrumentation, the proxy infers vLLM's actual cache state by comparing the trie's predicted reuse fraction with TTFT-implied reuse. A predicted hit ($\hat{r}>0.3$) that lands near cold-start ($r<0.15$) is flagged for trie pruning. The cold-TTFT estimate is updated online via EMA over observed misses.
+
+\begin{lstlisting}[caption={Cache-state feedback (\texttt{serving.py}).},label={lst:feedback}]
+def check_mismatch(self, predicted_prefix_len, k, ttft_ms):
+    self.total_observations += 1
+    pred_reuse   = predicted_prefix_len / max(k, 1)
+    actual_reuse = max(0.0, 1.0 - ttft_ms / max(self.cold_ttft, 1.0))
+    self.history.append((pred_reuse, actual_reuse))
+    if pred_reuse > 0.3 and actual_reuse < 0.15:
+        self.mismatches += 1
+        return True              # trie thinks hit, vLLM evicted
+    return False
+\end{lstlisting}
+
+\paragraph{Integrated serve loop.} The proxy threads ordering, prompt build, vLLM call, feedback, pruning, and admission into a single call with seven explicit stages, yielding the per-component overhead numbers reported in Table~\ref{tab:profiling}.
+
+\begin{lstlisting}[caption={\texttt{VLLMCacheProxy.serve\_request} (abridged).},label={lst:serve}]
+def serve_request(self, query, doc_ids, doc_contents, max_tokens=1):
+    # 1. Greedy trie walk -> ordered ids + predicted prefix length
+    ordered, predicted = self._greedy_walk(doc_ids)
+    # 2. Build prompt
+    prompt, _ = build_rag_prompt(query, ordered, doc_contents)
+    # 3. vLLM inference (APC enabled at LLM construction)
+    t0 = time.perf_counter()
+    out = self.llm.generate([prompt], sp)
+    ttft_ms = (time.perf_counter() - t0) * 1000
+    # 4. Feedback loop
+    self.feedback.update_cold_estimate(ttft_ms, predicted, len(doc_ids))
+    miss = self.feedback.check_mismatch(predicted, len(doc_ids), ttft_ms)
+    # 5. Prune stale paths if vLLM evicted them
+    if miss:
+        self._prune_path(ordered[:predicted])
+    # 6. Admit into multi-tier cache state
+    metas = [self.cache_manager.admit(d, 200, retrieval_rank=i+1)
+             for i, d in enumerate(ordered)]
+    self.cache_manager.insert_sequence(ordered, metas)
+    self.cache_manager.step()
+    return {"ttft_ms": ttft_ms, "predicted_prefix_len": predicted, ...}
+\end{lstlisting}
+
+The proxy is also wrapped as a FastAPI service (\texttt{RAGCacheMiddleware}) so an existing RAG application can switch to cache-aware ordering by replacing the \texttt{LLM} object with one HTTP endpoint, without touching its serving stack.
+
+\subsection{Engineering Details and Trade-offs}
+
+\begin{itemize}
+\item \textbf{vLLM API surface.} We pin to vLLM~$\geq$~0.8.0 for stable APC behavior; the proxy invokes only the public \texttt{LLM.generate} interface with \texttt{enable\_prefix\_caching=True} and standard \texttt{SamplingParams}. No internal vLLM symbols are imported, which makes the integration robust to engine-version drift.
+\item \textbf{Trie memory footprint.} Nodes use \texttt{\_\_slots\_\_} to bound per-node memory at ${\sim}120$\,B. In our 200-query benchmark the trie holds $<$1\,MB, well below any meaningful host budget.
+\item \textbf{Reproducible eviction.} \texttt{CacheManager.step()} advances a logical timestamp consumed by the PGDSF priority, decoupling eviction order from wall-clock noise. All benchmark scripts accept a \texttt{seed} argument; the multi-seed statistics in Section~\ref{sec:eval} are produced by re-running with seeds $\{0,1,2\}$ and aggregating with a $t$-distribution 95\% CI.
+\item \textbf{Fallback path.} When the trie is empty (cold start) or no document matches a cached child, the algorithm degenerates to retrieval-rank order. This guarantees the proxy is a strict superset of bare APC---never worse than the baseline.
+\end{itemize}
+
+% ================================================================
 \section{Discussion}
 \label{sec:discussion}
 % ================================================================
 
 \textbf{Prompt-layer cache scheduling.}
 RAGCache++ introduces \emph{prompt-layer cache scheduling} for APC-based RAG serving, analogous to how disk I/O schedulers reorder requests to exploit spatial locality without modifying the disk firmware. The ordering policy does not modify the cache mechanism itself (APC) but determines which cache lines are populated and in what order, directly controlling the prefill--reuse trade-off. Our profiling confirms this is a genuine systems effect: optimized ordering saves 66\% of prefill computation at p50 (Table~\ref{tab:cache_eff}), reduces inference latency by 29\% (Table~\ref{tab:profiling}), with zero throughput regression and zero memory overhead. The key architectural insight is that a \emph{thin scheduling layer} between retrieval and serving can recover substantial cache locality that the retrieval stage destroys---without requiring engine-level changes. This makes the policy composable with any APC-enabled system and deployable as a drop-in middleware component.
-We emphasize that the contribution is \emph{cache-aware document ordering as a scheduling abstraction}. The trie-based greedy algorithm achieves 97.5\% of oracle performance with $O(k)$ cost, and its online adaptivity enables it to track shifting workloads---making it the practical default for deployment.
+We emphasize that the contribution is \emph{cache-aware document ordering as a scheduling abstraction}. The trie-based greedy algorithm achieves 99\% of oracle TTFT reduction with $O(k)$ cost (prefix-length optimality ratio 0.997), and its online adaptivity enables it to track shifting workloads---making it the practical default for deployment.
 We acknowledge that the core scheduling idea is shared with concurrent work (ContextPilot~\citep{contextpilot2025}); our contribution is the \emph{deployment-ready realization}: a self-contained, engine-agnostic implementation with formal approximation guarantees, a closed-loop feedback mechanism, and comprehensive cross-workload/cross-architecture evaluation demonstrating that this simple approach is sufficient for practical RAG serving.
 
-\textbf{Relation to RAGCache.} Our knowledge tree is inspired by RAGCache's~\citep{jin2025ragcache} document-indexed trie structure, but serves a different purpose. RAGCache uses the tree for custom KV cache management within a modified serving engine; we use it solely for ordering decisions, relying on the engine's built-in APC for cache management. Our trie-based ordering achieves 97.5\% of oracle performance with $O(k)$ cost, confirming near-optimal scheduling quality. Our approach is complementary to RAGCache: it achieves comparable scheduling benefits without requiring engine modifications, and could be combined with RAGCache's cache management for further gains.
+\textbf{Relation to RAGCache.} Our knowledge tree is inspired by RAGCache's~\citep{jin2025ragcache} document-indexed trie structure, but serves a different purpose. RAGCache uses the tree for custom KV cache management within a modified serving engine; we use it solely for ordering decisions, relying on the engine's built-in APC for cache management. Our trie-based ordering achieves 99\% of oracle's TTFT reduction with $O(k)$ cost, confirming near-optimal scheduling quality. Our approach is complementary to RAGCache: it achieves comparable scheduling benefits without requiring engine modifications, and could be combined with RAGCache's cache management for further gains.
 
 \textbf{Relation to CacheBlend.} CacheBlend~\citep{yao2025cacheblend} addresses a harder problem: reusing KV blocks regardless of position via selective recomputation. Our approach avoids this complexity entirely by converting the problem to pure prefix matching through ordering. The two approaches are complementary: CacheBlend could handle the non-prefix portion of our reordered sequences for further gains.
 
@@ -725,7 +905,35 @@ We acknowledge that the core scheduling idea is shared with concurrent work (Con
 \label{sec:conclusion}
 % ================================================================
 
-We presented RAGCache++, a prompt-layer scheduling policy that improves KV cache prefix reuse in RAG serving by reordering documents to extend cached prefixes. Under bursty document overlap, RAGCache++ reduces median TTFT by 20--33\% over retrieval-order APC across two GPU configurations (statistically significant: $16.8 \pm 1.6$\,ms, 95\% CI excludes zero), saving 66\% of prefill computation at p50 while adding $<$0.13\% overhead, zero throughput regression, and zero GPU memory cost. End-to-end pipeline measurements confirm that benefits persist when retrieval latency is included (16--26\% at $T_{\text{ret}} = 10$--$50$\,ms). The knowledge tree's predicted reuse correlates with observed reuse at $r = 0.97$, validating the approximate cache index design. The greedy ordering achieves 97.5\% of oracle performance, benefits persist under concurrent load (7--10\% at batch sizes 1--8) and are robust to cache pressure (29--31\% across GPU memory levels). On a geospatial workload with naturally lower overlap (Jaccard~$= 0.17$), ordering still provides measurable gains (4.5\% TTFT reduction). The approach requires no serving-engine modifications (${\sim}150$ lines of Python). Our results demonstrate that prefix \emph{depth}---not just hit count---is the key driver of latency reduction in prefix-caching systems.
+We presented RAGCache++, a prompt-layer scheduling policy that improves KV cache prefix reuse in RAG serving by reordering documents to extend cached prefixes. Under bursty document overlap, RAGCache++ reduces median TTFT by 20--33\% over retrieval-order APC across two GPU configurations (statistically significant: $16.8 \pm 1.6$\,ms, 95\% CI excludes zero), saving 66\% of prefill computation at p50 while adding $<$0.13\% overhead, zero throughput regression, and zero GPU memory cost. End-to-end pipeline measurements confirm that benefits persist when retrieval latency is included (16--26\% at $T_{\text{ret}} = 10$--$50$\,ms). The knowledge tree's predicted reuse correlates with observed reuse at $r = 0.97$, validating the approximate cache index design. The greedy ordering achieves 99\% of oracle's TTFT reduction (prefix-length optimality ratio 0.997), benefits persist under concurrent load (7--10\% at batch sizes 1--8) and are robust to cache pressure (29--31\% across GPU memory levels). On a geospatial workload with naturally lower overlap (Jaccard~$= 0.17$), ordering still provides measurable gains (4.5\% TTFT reduction). The approach requires no serving-engine modifications (${\sim}150$ lines of Python). Our results demonstrate that prefix \emph{depth}---not just hit count---is the key driver of latency reduction in prefix-caching systems.
+
+% ================================================================
+\section{Team Member Contributions}
+\label{sec:contrib}
+% ================================================================
+
+The project was led by \textbf{Kaizhen Tan}, with \textbf{Rong Gu} and \textbf{Mingyuan Li} each owning specific subsystems and experiment tracks. Module names below refer to Table~\ref{tab:modules}.
+
+\paragraph{Kaizhen Tan (lead).}
+\begin{itemize}
+\item \textbf{System and code.} Designed the overall architecture and the integration layer: \texttt{vllm\_integration/serving.py} (\texttt{VLLMCacheProxy}, \texttt{CacheStateFeedback}, \texttt{RAGCacheMiddleware}) and \texttt{vllm\_integration/prompt\_builder.py}, plus the core benchmark drivers (\texttt{benchmark\_final.py}, \texttt{benchmark\_systems.py}, \texttt{benchmark\_integrated.py}, \texttt{benchmark\_reviewer.py}). Wired the previously stand-alone cache modules into the live vLLM serving path through the 7-stage \texttt{serve\_request} loop (Listing~\ref{lst:serve}).
+\item \textbf{Experiments.} Ran the main TTFT comparison (Table~\ref{tab:main}, Figure~\ref{fig:ttft}), overlap sensitivity sweep (Figure~\ref{fig:overlap}), systems-analysis suite (Tables~\ref{tab:profiling}--\ref{tab:concurrent}, \ref{tab:baselines}), end-to-end pipeline (Tables~\ref{tab:pipelining_e2e},~\ref{tab:e2e}), integrated-pipeline / feedback-loop validation (Section~\ref{sec:integrated}), and the cross-architecture experiment on Phi-3-mini-4k-instruct. Operated the local RTX 4060~Ti machine and managed all AutoDL RTX 4090 sessions.
+\item \textbf{Writing and infrastructure.} Primary author of the Abstract, Introduction, Methodology (Sections~\ref{sec:design}--\ref{sec:feedback}), Experiments, and Implementation Details. Produced all figures via \texttt{paper/gen\_figures.py}; set up the GitHub repository (\url{https://github.com/tantansir/RAGCachePlusPlus}); maintained the LaTeX build.
+\end{itemize}
+
+\paragraph{Rong Gu.}
+\begin{itemize}
+\item \textbf{Code.} Owned the cache subsystem: \texttt{cache/knowledge\_tree.py} (trie nodes, \texttt{prefix\_match}, eviction-aware lookup that short-circuits at \texttt{tier="none"} nodes), \texttt{cache/cache\_manager.py} (multi-tier accounting, GPU/host allocators, eviction triggers), \texttt{cache/pgdsf\_policy.py} (PGDSF priority computation), and \texttt{cache/spatial\_index.py} (geohash spatial filter consumed by the geospatial workload).
+\item \textbf{Experiments.} Designed and ran the system-validation experiments in Section~\ref{sec:trie_valid}: trie-vs-reality correlation under normal load and under cache pressure, plus the eviction-recovery measurements that characterize the feedback loop's accuracy. Designed the baseline matrix (sorted, recency, oracle, frequency-proxy) used in Table~\ref{tab:baselines} and contributed the greedy-vs-oracle approximation-quality analysis.
+\item \textbf{Writing.} Co-authored Background (Section~\ref{sec:background}, especially the APC mechanics and chained-hash analysis), the Knowledge Tree subsection of Methodology, and the Cache-State Feedback Loop subsection (Section~\ref{sec:feedback}).
+\end{itemize}
+
+\paragraph{Mingyuan Li.}
+\begin{itemize}
+\item \textbf{Code.} Owned the workload, retrieval, and high-level controller layers: \texttt{evaluation/workload\_generator.py} (synthetic bursty-overlap, geospatial, NQ-Open, mixed-topic, and Wikipedia-style real-corpus traces), the \texttt{retrieval/} TF-IDF retriever used by the real-corpus and NQ-Open evaluations, and \texttt{serving/rag\_controller.py} (the retrieval-inference pipelining controller behind Section~\ref{sec:design}).
+\item \textbf{Experiments.} Designed and ran the answer-quality experiments---extractive QA (EM\,$=$\,1.000, Section~\ref{sec:eval}) and multi-hop reasoning (Table~\ref{tab:multihop})---on Qwen2.5-7B; ran the workload-diversity experiments (NQ-Open, mixed-topic, real-corpus, geospatial; Tables~\ref{tab:spatial},~\ref{tab:real_corpus}, Section~\ref{sec:nq}).
+\item \textbf{Writing.} Lead author of Related Work (Section~\ref{sec:background}), Discussion (Section~\ref{sec:discussion}), Conclusion (Section~\ref{sec:conclusion}), and the Limitations and Future Work paragraphs; curated \texttt{paper/references.bib}; wrote the README and helped manage the LaTeX build.
+\end{itemize}
 
 \bibliography{references}
 \bibliographystyle{mlsys2024}

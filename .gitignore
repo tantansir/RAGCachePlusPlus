@@ -36,3 +36,18 @@ RAGCACHE_template/
 benchmark_local_results.json
 benchmark_results_v3.json
 benchmark_results_v4.json
+
+# Reference posters from classmates (not ours)
+DE-COP_Poster.pptx
+InfiniSST_poster.pptx
+salam_poster_1129.pptx
+
+# Poster generation scratch files
+_gen_poster.py
+_poster_full.png
+_poster_review.png
+_poster_samples/
+_tmp_img/
+
+# Duplicate PDFs (paper.pdf is just a copy of midterm_report.pdf)
+paper/paper.pdf

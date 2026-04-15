@@ -1,0 +1,48 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true
+  },
+  "timestamp": "2026-04-16 07:31:46",
+  "wiki_real_corpus": {
+    "corpus_size": 1000,
+    "num_queries": 200,
+    "top_k": 5,
+    "num_topics": 20,
+    "mean_jaccard": 0.0603,
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 45.78,
+      "p95_ms": 54.07,
+      "p99_ms": 55.46,
+      "mean_ms": 47.17,
+      "std_ms": 3.45
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 33.86,
+      "p95_ms": 46.75,
+      "p99_ms": 48.04,
+      "mean_ms": 34.15,
+      "std_ms": 9.76
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 24.78,
+      "p95_ms": 46.47,
+      "p99_ms": 47.79,
+      "mean_ms": 27.17,
+      "std_ms": 7.4
+    },
+    "improvements": {
+      "optimized_vs_nocache_p50_pct": 45.9,
+      "optimized_vs_nocache_p95_pct": 14.1,
+      "optimized_vs_nocache_mean_pct": 42.4,
+      "optimized_vs_retrieval_p50_pct": 26.8,
+      "optimized_vs_retrieval_p95_pct": 0.6,
+      "optimized_vs_retrieval_mean_pct": 20.4
+    }
+  }
+}

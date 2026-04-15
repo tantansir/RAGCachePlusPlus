@@ -1,0 +1,214 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "max_model_len": 4096,
+    "gpu_mem": 0.9,
+    "enforce_eager": true,
+    "dtype": "auto"
+  },
+  "timestamp": "2026-04-16 07:21:38",
+  "multihop_quality": {
+    "num_examples": 40,
+    "natural_retrieval": {
+      "n": 40,
+      "strict_em": 0.675,
+      "contains_em": 0.775,
+      "f1": 0.8624,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "natural_optimized": {
+      "n": 40,
+      "strict_em": 0.675,
+      "contains_em": 0.775,
+      "f1": 0.8624,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "reversed_retrieval": {
+      "n": 40,
+      "strict_em": 0.625,
+      "contains_em": 0.75,
+      "f1": 0.8257,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "reversed_optimized": {
+      "n": 40,
+      "strict_em": 0.625,
+      "contains_em": 0.75,
+      "f1": 0.8257,
+      "sample_predictions": [
+        {
+          "q": "In what year was the famous tower in the capital of France built?",
+          "gold": "1889",
+          "pred": "1889",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What equation was introduced by the theory developed in 1905?",
+          "gold": "E equals mc squared",
+          "pred": "E equals mc squared",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What shape is the structure discovered in 1953?",
+          "gold": "double helix",
+          "pred": "double helix",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What forest type surrounds the largest river by discharge?",
+          "gold": "tropical rainforest",
+          "pred": "tropical rainforest",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        },
+        {
+          "q": "What mission carried the first moonwalker?",
+          "gold": "Apollo 11",
+          "pred": "Apollo 11",
+          "sem": 1.0,
+          "cem": 1.0,
+          "f1": 1.0
+        }
+      ]
+    },
+    "ordering_impact": {
+      "natural_f1_diff": 0.0,
+      "reversed_f1_diff": 0.0,
+      "reordering_safe": true
+    },
+    "key_finding": "Multi-hop QA: nat_retr F1=0.8624, nat_opt F1=0.8624, rev_retr F1=0.8257, rev_opt F1=0.8257. Reordering safe."
+  },
+  "sensitivity": {
+    "error": "invalid literal for int() with base 10: 'doc0'"
+  }
+}
