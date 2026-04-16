@@ -4,127 +4,150 @@
 
 \begin{filecontents*}{references.bib}
 @article{jin2025ragcache,
-  author    = {Jin, Chao and Zhang, Zili and Jiang, Xuanlin and Liu, Fangyue and Liu, Xin and Liu, Xuanzhe and Jin, Xin},
+  author    = {Jin, Chao and Zhang, Zili and Jiang, Xuanlin and Liu, Fangyue and Liu, Shufan and Liu, Xuanzhe and Jin, Xin},
   title     = {{RAGCache}: Efficient Knowledge Caching for Retrieval-Augmented Generation},
   journal   = {ACM Transactions on Computer Systems},
-  year      = {2025},
+  year      = {2026},
   volume    = {44},
   number    = {1},
-  pages     = {1--27},
-  publisher = {Association for Computing Machinery},
+  articleno = {2},
+  pages     = {2:1--2:27},
   doi       = {10.1145/3768628}
 }
-
 @inproceedings{yao2025cacheblend,
   author    = {Yao, Jiayi and Li, Hanchen and Liu, Yuhan and Ray, Siddhant and Cheng, Yihua and Zhang, Qizheng and Du, Kuntai and Lu, Shan and Jiang, Junchen},
   title     = {{CacheBlend}: Fast Large Language Model Serving for {RAG} with Cached Knowledge Fusion},
-  booktitle = {Proceedings of the Twentieth European Conference on Computer Systems (EuroSys~'25)},
+  booktitle = {Proceedings of the Twentieth European Conference on Computer Systems},
+  series    = {EuroSys '25},
   year      = {2025},
-  pages     = {94--109},
   address   = {Rotterdam, Netherlands},
-  publisher = {ACM},
+  pages     = {94--109},
+  publisher = {Association for Computing Machinery},
   doi       = {10.1145/3689031.3696098}
 }
-
-@misc{kwon2023pagedattention,
-  author        = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
-  title         = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
-  year          = {2023},
-  archivePrefix = {arXiv},
-  eprint        = {2309.06180}
+@inproceedings{kwon2023pagedattention,
+  author    = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+  title     = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+  booktitle = {Proceedings of the 29th Symposium on Operating Systems Principles},
+  series    = {SOSP '23},
+  year      = {2023},
+  pages     = {611--626},
+  publisher = {Association for Computing Machinery},
+  doi       = {10.1145/3600006.3613165}
 }
-
-@misc{zheng2024sglang,
-  author        = {Zheng, Lianmin and Yin, Liangsheng and Xie, Zhiqiang and Sun, Chuyue and Huang, Jeff and Yu, Cody Hao and Cao, Shiyi and Kozyrakis, Christos and Stoica, Ion and Gonzalez, Joseph E. and Barrett, Clark and Sheng, Ying},
-  title         = {{SGLang}: Efficient Execution of Structured Language Model Programs},
-  year          = {2024},
-  archivePrefix = {arXiv},
-  eprint        = {2312.07104},
-  doi           = {10.48550/arXiv.2312.07104}
+@inproceedings{zheng2024sglang,
+  author    = {Zheng, Lianmin and Yin, Liangsheng and Xie, Zhiqiang and Sun, Chuyue and Huang, Jeff and Yu, Cody Hao and Cao, Shiyi and Kozyrakis, Christos and Stoica, Ion and Gonzalez, Joseph E. and Barrett, Clark W. and Sheng, Ying},
+  title     = {{SGLang}: Efficient Execution of Structured Language Model Programs},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2024}
 }
-
-@article{lewis2020rag,
-  author  = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
-  title   = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
-  journal = {Advances in Neural Information Processing Systems},
-  year    = {2020},
-  volume  = {33},
-  pages   = {9459--9474}
+@inproceedings{lewis2020rag,
+  author    = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
+  title     = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  year      = {2020},
+  pages     = {9459--9474}
 }
-
 @inproceedings{yang2018hotpotqa,
-  author    = {Yang, Zhilin and Qi, Peng and Zhang, Saizheng and Bengio, Yoshua and Cohen, William W. and Salakhutdinov, Ruslan and Manning, Christopher D.},
+  author    = {Yang, Zhilin and Qi, Peng and Zhang, Saizheng and Bengio, Yoshua and Cohen, William and Salakhutdinov, Ruslan and Manning, Christopher D.},
   title     = {{HotpotQA}: A Dataset for Diverse, Explainable Multi-hop Question Answering},
   booktitle = {Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing},
   year      = {2018},
-  pages     = {2369--2380},
   address   = {Brussels, Belgium},
-  publisher = {Association for Computational Linguistics}
+  publisher = {Association for Computational Linguistics},
+  pages     = {2369--2380},
+  doi       = {10.18653/v1/D18-1259}
 }
-
 @article{gao2024ragsurvey,
   author  = {Gao, Yunfan and Xiong, Yun and Gao, Xinyu and Jia, Kangxiang and Pan, Jinliu and Bi, Yuxi and Dai, Yi and Sun, Jiawei and Wang, Meng and Wang, Haofen},
   title   = {Retrieval-Augmented Generation for Large Language Models: A Survey},
-  journal = {arXiv preprint arXiv:2312.10997},
-  year    = {2024},
+  journal = {CoRR},
+  volume  = {abs/2312.10997},
+  year    = {2023},
   doi     = {10.48550/arXiv.2312.10997}
 }
-
 @article{qwen25tr,
-  author        = {{Qwen Team}},
-  title         = {{Qwen2.5 Technical Report}},
-  journal       = {arXiv preprint arXiv:2412.15115},
-  year          = {2024},
-  archivePrefix = {arXiv},
-  eprint        = {2412.15115}
+  author  = {Yang, An and Yang, Baosong and Zhang, Beichen and others},
+  title   = {{Qwen2.5 Technical Report}},
+  journal = {CoRR},
+  volume  = {abs/2412.15115},
+  year    = {2024},
+  doi     = {10.48550/arXiv.2412.15115}
 }
-
 @misc{yu2025spatialrag,
   author        = {Yu, Dazhou and Bao, Riyang and Ning, Ruiyu and Peng, Jinghong and Mai, Gengchen and Zhao, Liang},
   title         = {{Spatial-RAG}: Spatial Retrieval Augmented Generation for Real-World Geospatial Reasoning Questions},
   year          = {2025},
   archivePrefix = {arXiv},
-  eprint        = {2502.18470}
+  eprint        = {2502.18470},
+  doi           = {10.48550/arXiv.2502.18470}
 }
-
 @inproceedings{tang2024itinera,
-  title     = {{ItiNera}: Integrating Spatial Optimization with Large Language Models for Open-domain Urban Itinerary Planning},
   author    = {Tang, Yihong and Wang, Zhaokai and Qu, Ao and Yan, Yihao and Wu, Zhaofeng and Zhuang, Dingyi and Kai, Jushi and Hou, Kebing and Guo, Xiaotong and Zhao, Jinhua and Zhao, Zhan and Ma, Wei},
+  title     = {{ItiNera}: Integrating Spatial Optimization with Large Language Models for Open-domain Urban Itinerary Planning},
   booktitle = {Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: Industry Track},
   year      = {2024},
-  pages     = {1413--1432},
   address   = {Miami, Florida, US},
   publisher = {Association for Computational Linguistics},
+  pages     = {1413--1432},
   doi       = {10.18653/v1/2024.emnlp-industry.104}
 }
-
 @inproceedings{lmcache2024,
   author    = {Liu, Yuhan and Li, Hanchen and Cheng, Yihua and Ray, Siddhant and Huang, Yuyang and Zhang, Qizheng and Du, Kuntai and Yao, Jiayi and Lu, Shan and Ananthanarayanan, Ganesh and Maire, Michael and Hoffmann, Henry and Holtzman, Ari and Jiang, Junchen},
   title     = {{CacheGen}: {KV} Cache Compression and Streaming for Fast Large Language Model Serving},
   booktitle = {Proceedings of the ACM SIGCOMM 2024 Conference},
+  series    = {ACM SIGCOMM '24},
   year      = {2024},
   pages     = {38--56},
+  publisher = {Association for Computing Machinery},
   doi       = {10.1145/3651890.3672274}
 }
-
 @misc{vllm_apc,
-  author       = {{vLLM Project}},
-  title        = {{Automatic Prefix Caching}},
-  year         = {2025},
-  howpublished = {\url{https://docs.vllm.ai/en/latest/design/prefix_caching/}},
-  note         = {Accessed: 2026-03-31}
+  author = {{vLLM Project}},
+  title  = {{Automatic Prefix Caching}},
+  year   = {2025},
+  url    = {https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/},
+  note   = {Accessed: 2026-04-16}
 }
-
+@article{cachecraft2025,
+  author    = {Agarwal, Shubham and Sundaresan, Sai and Mitra, Subrata and Mahapatra, Debabrata and Gupta, Archit and Sharma, Rounak and Kapu, Nirmal Joshua and Yu, Tong and Saini, Shiv},
+  title     = {{Cache-Craft}: Managing Chunk-Caches for Efficient Retrieval-Augmented Generation},
+  journal   = {Proceedings of the ACM on Management of Data},
+  year      = {2025},
+  volume    = {3},
+  number    = {3},
+  articleno = {136},
+  pages     = {136:1--136:28},
+  doi       = {10.1145/3725273}
+}
+@inproceedings{turborag2024,
+  author    = {Lu, Songshuo and Wang, Hua and Rong, Yutian and Chen, Zhi and Tang, Yaohua},
+  title     = {{TurboRAG}: Accelerating Retrieval-Augmented Generation with Precomputed {KV} Caches for Chunked Text},
+  booktitle = {Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2025},
+  pages     = {6588--6601},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/2025.emnlp-main.334}
+}
+@misc{contextpilot2025,
+  author        = {Jiang, Yinsicheng and Huang, Yeqi and Cheng, Liang and Deng, Cheng and Sun, Xuan and Mai, Luo},
+  title         = {{ContextPilot}: Fast Long-Context Inference via Context Reuse},
+  year          = {2025},
+  archivePrefix = {arXiv},
+  eprint        = {2511.03475},
+  doi           = {10.48550/arXiv.2511.03475}
+}
 @article{kwiatkowski2019nq,
-  author  = {Kwiatkowski, Tom and Palomaki, Jennimaria and Redfield, Olivia and Collins, Michael and Parikh, Ankur and Alberti, Chris and Epstein, Danielle and Polosukhin, Illia and Devlin, Jacob and Lee, Kenton and Toutanova, Kristina and Jones, Llion and Kelcey, Matthew and Chang, Ming-Wei and Dai, Andrew M. and Uszkoreit, Jakob and Le, Quoc and Petrov, Slav},
-  title   = {{Natural Questions}: A Benchmark for Question Answering Research},
-  journal = {Transactions of the Association for Computational Linguistics},
-  year    = {2019},
-  volume  = {7},
-  pages   = {453--466},
-  doi     = {10.1162/tacl_a_00276}
+  author    = {Kwiatkowski, Tom and Palomaki, Jennimaria and Redfield, Olivia and Collins, Michael and Parikh, Ankur and Alberti, Chris and Epstein, Danielle and Polosukhin, Illia and Devlin, Jacob and Lee, Kenton and Toutanova, Kristina and Jones, Llion and Kelcey, Matthew and Chang, Ming-Wei and Dai, Andrew M. and Uszkoreit, Jakob and Le, Quoc and Petrov, Slav},
+  title     = {{Natural Questions}: A Benchmark for Question Answering Research},
+  journal   = {Transactions of the Association for Computational Linguistics},
+  volume    = {7},
+  year      = {2019},
+  publisher = {MIT Press},
+  pages     = {452--466},
+  doi       = {10.1162/tacl_a_00276}
 }
-
 \end{filecontents*}
 
 \usepackage{microtype}
