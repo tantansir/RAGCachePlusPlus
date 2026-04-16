@@ -291,7 +291,15 @@ vLLM manages KV cache memory in fixed-size \emph{blocks} via PagedAttention~\cit
 
 Concretely, APC identifies reusable prefix blocks using block-level hashing over the prefix state; once a prefix mismatch occurs, subsequent blocks can no longer be reused for that request, so the remaining prompt must be prefetched again~\citep{vllm_apc}.
 
-\textbf{Implication for RAG.} Because the hash is \emph{chained}, even a single-token difference at position $j$ invalidates all blocks at positions $\geq j$. This means that if two RAG prompts share documents $\{A, B, C\}$ but arrange them as $[A, B, C, D, E]$ vs.\ $[B, A, C, D, F]$, the prefix diverges at the very first document and no KV blocks are reused---despite 60\% document overlap.
+\textbf{Implication for RAG.} Because the hash is \emph{chained}, even a single-token difference at position $j$ invalidates all blocks at positions $\geq j$. This means that if two RAG prompts share documents $\{A, B, C\}$ but arrange them as $[A, B, C, D, E]$ vs.\ $[B, A, C, D, F]$, the prefix diverges at the very first document and no KV blocks are reused---despite 60\% document overlap. Figure~\ref{fig:prefix_blocks} illustrates this gap and shows how reordering closes it.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/prefix_blocks.png}
+\caption{Prefix alignment in APC-based RAG serving. Request~1 is cached. Request~2 shares 60\% of its documents but in retrieval order the prefix diverges at block~2, yielding 0\% reuse. Reordering the shared documents to the front restores prefix alignment: 4 blocks reused, 66\% prefill saved.}
+\label{fig:prefix_blocks}
+\vspace{-1em}
+\end{figure}
 
 \subsection{Related Work}
 
@@ -355,6 +363,14 @@ Algorithm~\ref{alg:ordering} describes the ordering procedure. Starting at the t
 \STATE \textbf{return} $O$
 \end{algorithmic}
 \end{algorithm}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/trie_diagram.png}
+\caption{Knowledge tree example. Dark nodes are cached; gray nodes are evicted or from other branches. Given candidate set $\{A,B,C,F,D\}$, the greedy walk follows root$\to$A$\to$B$\to$C (the longest cached path), yielding a 4-document prefix hit. The remaining document is appended in retrieval-rank order.}
+\label{fig:trie}
+\vspace{-1em}
+\end{figure}
 
 \textbf{Objective.} The ordering problem can be stated as: given a candidate set $D$ and a trie $T$ recording recently cached document sequences, find the permutation $\pi$ of $D$ that maximizes the number of leading documents matching a path in $T$ (i.e., the cached prefix length). Because APC uses chained hashes, each additional matched document avoids prefilling all of that document's tokens, so maximizing prefix length directly minimizes prefill cost. The greedy trie walk is $O(k^{2})$ worst case (the inner loop scans up to $|R|$ candidates at each of $k$ levels) but $O(k)$ in the common case where the trie has at most one matching child per level (often the case in our synthetic bursty setting). It does not perform multi-step lookahead.
 
