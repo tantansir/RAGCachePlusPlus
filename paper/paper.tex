@@ -932,8 +932,9 @@ We presented RAGCache++, a prompt-layer scheduling policy that improves KV cache
 \label{sec:contrib}
 % ================================================================
 
-% Allow looser line breaking (long texttt{...} + \ref{...} runs create
-% internal whitespace rivers under strict justification).
+% Wrap this section in a group so the looser line-breaking settings
+% (\sloppy + \emergencystretch) don't leak into the appendix below.
+\begingroup
 \sloppy
 \emergencystretch=3em
 
@@ -947,18 +948,18 @@ Owned the cache subsystem (\texttt{knowledge\_tree.py}, \texttt{cache\_manager.p
 
 \paragraph{Mingyuan Li.}
 Owned workload generation, retrieval, and the high-level controller (\texttt{workload\_generator.py}, \texttt{retrieval/}, \texttt{rag\_controller.py}). Ran the answer-quality and workload-diversity experiments (multi-hop, NQ-Open, mixed-topic, real corpus, geospatial). Lead author of Related Work, Discussion, and Conclusion; curated \texttt{references.bib} and wrote the README.
+\endgroup
 
 \bibliography{references}
 \bibliographystyle{mlsys2024}
 
 \appendix
 
-% Tighten appendix section spacing
-\titlespacing*{\section}{0pt}{0.6em}{0.3em}
+% Tighter section spacing for the appendix
+\titlespacing*{\section}{0pt}{0.8em}{0.4em}
 
 \section{Experimental Configuration Details}
 \label{app:config}
-\vspace{-0.4em}
 
 \begin{table}[h]
 \caption{Hardware and software configuration.}
@@ -979,12 +980,10 @@ Top-$k$ & 5 & 5 \\
 Use & TTFT, overlap & TTFT, systems \\
 \bottomrule
 \end{tabular}
-\vspace{-0.8em}
 \end{table}
 
 \section{Overlap Sweep Raw Data}
 \label{app:overlap}
-\vspace{-0.4em}
 
 \begin{table}[h]
 \caption{Raw data for overlap sensitivity (RTX 4060~Ti, Qwen2.5-1.5B-Instruct).}
@@ -1002,12 +1001,10 @@ Use & TTFT, overlap & TTFT, systems \\
 0.8 & 0.661 & 50.4  & 50.8  & $-0.8$\% \\
 \bottomrule
 \end{tabular}
-\vspace{-0.8em}
 \end{table}
 
 \section{Systems Benchmark Details}
 \label{app:v100}
-\vspace{-0.4em}
 
 The systems analysis in Section~\ref{sec:systems} (throughput, profiling, pipelining, memory) uses Config~B (RTX 4090) with \texttt{enforce\_eager=True} (CUDA graphs disabled for measurement stability).
 
