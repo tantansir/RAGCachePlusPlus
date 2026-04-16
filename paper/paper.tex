@@ -842,12 +842,12 @@ Under eviction pressure (\texttt{gpu\_mem}\,=\,0.78), the feedback loop achieves
 \label{sec:impl}
 % ================================================================
 
-We release RAGCache++ as a self-contained Python package layered on top of vLLM ($\geq$0.8.0) and FastAPI. The code partitions into two tiers by scope: (i)~the \textbf{core ordering policy} that all main-benchmark gains rely on---the greedy trie walk in \texttt{prompt\_builder.py} (107 LOC) plus the ordering-and-prompt-build portion of \texttt{serving.py}'s \texttt{serve\_request} loop (${\sim}$40 LOC, steps~1--3 of Listing~\ref{lst:serve})---totals approximately 150 LOC; (ii)~the \textbf{full integrated system} including the cache manager, PGDSF policy, feedback loop, spatial index, and FastAPI middleware is approximately 2{,}200 LOC (see Table~\ref{tab:modules} for the per-file breakdown, which sums to 2{,}183 LOC; \texttt{serving.py}'s ${\sim}$250 LOC outside the ordering/prompt-build portion implements the feedback loop, pruning, and HTTP middleware, which are part of tier~(ii) but not tier~(i)). Source code, benchmarks, and result JSONs are available at \url{https://github.com/tantansir/RAGCachePlusPlus}.
+We release RAGCache++ as a self-contained Python package layered on top of vLLM ($\geq$0.8.0) and FastAPI. The code partitions into two tiers by scope: (i)~the \textbf{core ordering policy} that all main-benchmark gains rely on---the greedy trie walk in \texttt{prompt\_builder.py} (107 LOC) plus the ordering-and-prompt-build portion of \texttt{serving.py}'s \texttt{serve\_request} loop (${\sim}$40 LOC, steps~1--3 of Listing~\ref{lst:serve})---totals approximately 150 LOC; (ii)~the \textbf{full integrated system} including the cache manager, PGDSF policy, feedback loop, spatial index, and FastAPI middleware is approximately 2{,}200 LOC (see Table~\ref{tab:modules} for the core-library breakdown, which sums to 2{,}183 LOC; benchmark scripts, workload generators, and evaluation harnesses are additional code not counted in this total; \texttt{serving.py}'s ${\sim}$250 LOC outside the ordering/prompt-build portion implements the feedback loop, pruning, and HTTP middleware, which are part of tier~(ii) but not tier~(i)). Source code, benchmarks, and result JSONs are available at \url{https://github.com/tantansir/RAGCachePlusPlus}.
 
 \subsection{Module Organization}
 
 \begin{table}[h]
-\caption{Module organization. Cache subsystem and integration layer are decoupled: the trie + prompt builder can run without GPU for unit tests.}
+\caption{Core-library modules (excludes benchmark scripts, workload generators, and evaluation harnesses). Cache subsystem and integration layer are decoupled: the trie + prompt builder can run without GPU for unit tests.}
 \label{tab:modules}
 \centering
 \scriptsize
