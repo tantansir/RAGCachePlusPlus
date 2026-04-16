@@ -482,20 +482,20 @@ Table~\ref{tab:main} and Figure~\ref{fig:ttft} present the core results.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/ttft_comparison.pdf}
-\caption{TTFT p50 comparison across strategies. Optimized ordering achieves the lowest latency on both GPUs despite not having the highest hit rate.}
+\caption{TTFT p50 comparison across strategies. Optimized ordering achieves the lowest latency on both GPUs despite not having the highest Fast\%$^\dagger$ proxy.}
 \label{fig:ttft}
 \vspace{-1em}
 \end{figure}
 
 \textbf{Key findings:}
 \begin{itemize}
-\item \textbf{Median TTFT improves by 20.1\% (4060~Ti) and 32.7\% (4090)} over retrieval-order APC. Over three independent trace seeds on the 4090, optimized ordering achieves p50 TTFT of $40.0 \pm 0.3$\,ms (95\% CI: $\pm 0.7$\,ms), yielding a \textbf{statistically significant} improvement of 16.8\,ms (29.6\%, CI excludes zero). The gains are concentrated in the common case (p50); \textbf{p95 latency is largely unchanged} across APC strategies, because the tail consists of cold-start queries (first query in a new region) where no cached prefix exists regardless of ordering.
-\item \textbf{Sorted ordering underperforms retrieval order} despite having the highest hit rate (Sorted 25.3--25.6\% vs.\ Optimized 18.9--19.0\%; Retrieval 12.3--17.9\%). Lexicographic sorting creates many short, fragmented prefix matches, while tree-based ordering creates fewer but \emph{longer} contiguous matches. Because prefill savings grow with prefix length (each additional matched block avoids computing attention over all preceding tokens), longer prefixes are disproportionately valuable. This observation---that prefix \emph{depth}, not hit \emph{count}, drives latency reduction---is a key takeaway.
+\item \textbf{Median TTFT improves by 20.1\% (4060~Ti) and 32.7\% (4090)} over retrieval-order APC. Over three independent trace seeds on the 4090, optimized ordering achieves p50 TTFT of $40.0 \pm 0.3$\,ms (95\% CI: $\pm 0.7$\,ms), yielding a \textbf{statistically significant} improvement of $16.8 \pm 1.6$\,ms (29.6\%; $\pm 1.6$\,ms is the 95\% CI half-width of the improvement, computed via $t$-distribution over three seeds). The gains are concentrated in the common case (p50); \textbf{p95 latency is largely unchanged} across APC strategies, because the tail consists of cold-start queries (first query in a new region) where no cached prefix exists regardless of ordering.
+\item \textbf{Sorted ordering underperforms retrieval order} despite having the highest Fast\%$^\dagger$ cache-hit proxy (Sorted 25.3--25.6\% vs.\ Optimized 18.9--19.0\%; Retrieval 12.3--17.9\%). Lexicographic sorting creates many short, fragmented prefix matches, while tree-based ordering creates fewer but \emph{longer} contiguous matches. Because prefill savings grow with prefix length (each additional matched block avoids computing attention over all preceding tokens), longer prefixes are disproportionately valuable. This observation---that prefix \emph{depth}, not hit \emph{count}, drives latency reduction---is a key takeaway.
 \end{itemize}
 
 \paragraph{Hit rate vs.\ latency.}
 
-Figure~\ref{fig:hitrate} reveals a counterintuitive result: higher prefix hit rate does not always translate to lower latency. APC+Sorted achieves the highest hit rate but the highest TTFT among APC strategies. This is because:
+Figure~\ref{fig:hitrate} reveals a counterintuitive result: a higher Fast\%$^\dagger$ cache-hit proxy does not always translate to lower latency. APC+Sorted achieves the highest proxy value but the highest TTFT among APC strategies. This is because:
 \begin{enumerate}
 \item Sorted ordering distributes prefix matches across many short prefixes (e.g., matching only the first 1--2 documents before diverging).
 \item Optimized ordering concentrates matches into fewer but longer prefixes (e.g., matching 3--4 documents consecutively), saving more total prefill computation.
@@ -505,7 +505,7 @@ This demonstrates that \emph{prefix length}, not just hit count, is the relevant
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/hitrate_vs_ttft.pdf}
-\caption{Prefix hit rate vs.\ TTFT across strategies and GPUs. Higher hit rate does not guarantee lower latency---prefix \emph{length} matters more.}
+\caption{Fast\%$^\dagger$ cache-hit proxy vs.\ TTFT across strategies and GPUs. A higher proxy value does not guarantee lower latency---prefix \emph{length} matters more than hit \emph{count}.}
 \label{fig:hitrate}
 \vspace{-1em}
 \end{figure}
@@ -745,7 +745,7 @@ To test a workload with heterogeneous, moderate overlap, we generate traces wher
 
 \paragraph{Real-corpus TF-IDF (low natural overlap, Jaccard = 0.06).}
 \label{sec:real_corpus}
-To address the concern that all workloads above still rely on \emph{some} form of topic clustering, we additionally construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to produce a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter, no topic clustering. The resulting mean Jaccard is only $0.06$, characteristic of unconstrained diverse-topic retrieval. Table~\ref{tab:real_corpus} (values in this table correspond only to this real-corpus experiment) shows that even under this very low natural overlap, optimized ordering reduces p50 TTFT by \textbf{26.8\%} (24.8\,ms vs.\ 33.9\,ms) and mean TTFT by 20.4\%, confirming that the benefit is not an artifact of high controlled overlap. This result may appear to conflict with the ``diminishing returns below Jaccard\,$\approx$\,0.2'' trend in Figure~\ref{fig:overlap} and the geospatial workload (4.5\% at Jaccard\,$=$\,0.17). The key difference is that the overlap sweep and geospatial workload use a \emph{single} synthetic corpus with uniform document lengths, whereas the Wikipedia corpus is topic-clustered: even though the \emph{mean} Jaccard across all query pairs is only 0.06, consecutive within-topic queries can share documents at much higher rates, creating intermittent prefix-sharing bursts that the trie exploits. In other words, mean Jaccard alone does not fully predict ordering benefit---the \emph{temporal locality structure} of the query trace matters.
+To move beyond explicitly controlled overlap, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to produce a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter and no explicit query-sequence clustering. The resulting mean Jaccard is only $0.06$. Table~\ref{tab:real_corpus} (values in this table correspond only to this real-corpus experiment) shows that even under this very low mean overlap, optimized ordering reduces p50 TTFT by \textbf{26.8\%} (24.8\,ms vs.\ 33.9\,ms) and mean TTFT by 20.4\%. This result may appear to conflict with the ``diminishing returns below Jaccard\,$\approx$\,0.2'' trend in Figure~\ref{fig:overlap} and the geospatial workload (4.5\% at Jaccard\,$=$\,0.17). The key difference is that the overlap sweep and geospatial workload use a single synthetic corpus with uniform document lengths, whereas the Wikipedia corpus has inherent topical structure (20 topics, each with ${\sim}$50 passages): even though the \emph{mean} Jaccard across all query pairs is only 0.06, consecutive queries on related topics can share retrieved passages at much higher rates, creating intermittent prefix-sharing bursts that the trie exploits. In other words, mean Jaccard alone does not fully predict ordering benefit---the \emph{temporal locality structure} of the query trace matters.
 
 \begin{table}[t]
 \caption{Real-corpus evaluation with TF-IDF retrieval (RTX 4090, 200 queries, 1000 Wikipedia-style passages / 20 topics; mean Jaccard = 0.06, no controlled overlap).}
