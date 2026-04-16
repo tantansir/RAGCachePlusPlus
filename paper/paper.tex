@@ -267,11 +267,11 @@ While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextp
 
 \textbf{Research questions.} We organize the paper around five research questions:
 \begin{itemize}
-\item \textbf{RQ1.} Can pure prompt-layer scheduling (zero engine modification) capture most of the APC benefit? \emph{(Section~\ref{sec:eval}, Table~\ref{tab:main}; Section~\ref{sec:systems})}
-\item \textbf{RQ2.} How close is $O(k)$ greedy to exhaustive oracle ordering? \emph{(Section~\ref{sec:design}: prefix-length ratio 0.997; Table~\ref{tab:baselines}: TTFT ratio 97.5\%)}
-\item \textbf{RQ3.} Does the benefit generalize across real corpora, model architectures, and overlap regimes? \emph{(Section~\ref{sec:nq}; Section~\ref{sec:systems} Generality)}
-\item \textbf{RQ4.} Can a TTFT-based feedback loop keep the trie synchronized with vLLM's actual cache state without engine instrumentation? \emph{(Section~\ref{sec:feedback}; Section~\ref{sec:trie_valid}, $r=0.97$; Section~\ref{sec:integrated}, 99.5\% accuracy)}
-\item \textbf{RQ5.} Does reordering preserve answer quality, including on multi-hop reasoning? \emph{(EM $=$ 1.000 extractive; Table~\ref{tab:multihop}: $\Delta$EM $=$ $\Delta$F1 $=$ 0)}
+\item \textbf{RQ1.} Can pure prompt-layer scheduling (zero engine modification) capture most of the APC benefit? \emph{(Section~\ref{sec:eval}; Section~\ref{sec:systems})}
+\item \textbf{RQ2.} How close is $O(k)$ greedy to exhaustive oracle ordering? \emph{(Section~\ref{sec:design}; Section~\ref{sec:systems})}
+\item \textbf{RQ3.} Does the benefit generalize across real corpora, model architectures, and overlap regimes? \emph{(Section~\ref{sec:nq}; Section~\ref{sec:systems})}
+\item \textbf{RQ4.} Can a TTFT-based feedback loop keep the trie synchronized with vLLM's actual cache state without engine instrumentation? \emph{(Section~\ref{sec:feedback}; Section~\ref{sec:trie_valid}; Section~\ref{sec:integrated})}
+\item \textbf{RQ5.} Does reordering preserve answer quality, including on multi-hop reasoning? \emph{(Section~\ref{sec:eval}; Section~\ref{sec:multihop})}
 \end{itemize}
 
 Across these questions we evaluate on two GPU configurations, four model sizes spanning two architectures, and six workloads spanning a Jaccard overlap range of 0.06--0.88 (synthetic bursty, overlap sweep, geospatial, NQ-Open-derived, mixed-topic, and real-corpus TF-IDF), and show that simple prompt-layer ordering captures most of the available APC benefit.
