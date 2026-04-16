@@ -787,7 +787,7 @@ We evaluate the full integrated pipeline (\texttt{VLLMCacheProxy}) against bare 
 
 The integrated proxy achieves the same latency reduction as the simple wrapper (29.7\% p50 improvement over bare vLLM) while adding cache-state synchronization via the feedback loop. Per-component profiling shows the system overhead is dominated by prompt construction (0.032\,ms) and trie ordering (0.017\,ms); inference accounts for 99.9\% of wall-clock time.
 
-Under eviction pressure (\texttt{gpu\_mem}\,=\,0.78), the feedback loop achieves 99.5\% prediction accuracy with only 1 mismatch out of 200 queries, triggering 1 trie pruning event. This confirms that the feedback mechanism correctly detects and corrects stale trie entries in practice, though the sequential workload produces few evictions even at reduced memory. The feedback loop achieves 99.5\% prediction accuracy, confirming that the trie is an accurate cache proxy and that the feedback mechanism correctly detects the rare stale entries that do occur.
+Under eviction pressure (\texttt{gpu\_mem}\,=\,0.78), the feedback loop achieves \textbf{99.5\% prediction accuracy}---only 1 mismatch out of 200 queries, triggering 1 trie pruning event. The sequential workload produces few evictions even at reduced memory, so the accuracy mainly reflects that the trie is an accurate cache proxy in this regime; the feedback mechanism correctly detects and prunes the rare stale entries that do occur.
 
 % ================================================================
 \section{Implementation Details}
