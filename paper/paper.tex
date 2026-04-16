@@ -640,7 +640,7 @@ APC+Opt.  & 66.3\% & 57.6\% & 77.7\% & 185/195 \\
 \end{table}
 
 \paragraph{Concurrent load.}
-A key concern is whether ordering benefits survive when multiple requests share the GPU simultaneously. Table~\ref{tab:concurrent} measures per-request TTFT under batched processing at concurrency levels 1--8. The knowledge tree is updated \emph{between} batches, simulating realistic concurrent arrivals where ordering decisions use stale cache state. Optimized ordering provides \textbf{7--10\% TTFT reduction across all batch sizes}, demonstrating that the benefit is not an artifact of sequential evaluation. Throughput also increases: at batch size~8, optimized ordering achieves 28.0\,req/s vs.\ 26.1\,req/s for retrieval order.
+A key concern is whether ordering benefits survive when multiple requests share the GPU simultaneously. Table~\ref{tab:concurrent} measures per-request TTFT under batched processing at concurrency levels 1--8. The knowledge tree is updated \emph{between} batches, simulating realistic concurrent arrivals where ordering decisions use stale cache state. Optimized ordering provides \textbf{6.9--9.9\% TTFT reduction} across all batch sizes (7.3\% at batch~1, 7.8\% at batch~2, 9.9\% at batch~4, 6.9\% at batch~8), demonstrating that the benefit is not an artifact of sequential evaluation. Throughput also increases: at batch size~8, optimized ordering achieves 28.0\,req/s vs.\ 26.1\,req/s for retrieval order.
 
 \begin{table}[t]
 \caption{Concurrent load: avg per-request TTFT at different batch sizes (RTX 4090, 200 queries). Ordering benefit persists across all concurrency levels.}
@@ -753,7 +753,7 @@ APC+Optimized & \textbf{24.8} & \textbf{46.5} & \textbf{27.2} & +26.8\% \\
 \subsection{End-to-End Pipeline Latency}
 \label{sec:e2e}
 
-A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} reports end-to-end TTFT---defined as the time from query arrival until the first generated token, including simulated retrieval and prompt construction---at three realistic retrieval delays. Each request additionally generates 50 output tokens to make the workload representative of full RAG serving, but the 50-token decode is \emph{not} part of the TTFT measurement. Even including retrieval overhead, ordering provides \textbf{15--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies. Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (3--10\%).
+A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} reports end-to-end TTFT---defined as the time from query arrival until the first generated token, including simulated retrieval and prompt construction---at three realistic retrieval delays. Each request additionally generates 50 output tokens to make the workload representative of full RAG serving, but the 50-token decode is \emph{not} part of the TTFT measurement. Even including retrieval overhead, ordering provides \textbf{16--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies (15.7\% at $T_{\text{ret}}{=}50$\,ms, 19.3\% at 30\,ms, 25.5\% at 10\,ms). Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (2.7--9.5\%).
 
 \begin{table}[t]
 \caption{End-to-end TTFT (ms) including retrieval latency (RTX 4090, 200 queries; workload generates 50 output tokens per request but TTFT excludes the 50-token decode).}
