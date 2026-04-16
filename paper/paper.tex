@@ -996,6 +996,7 @@ Owned workload generation, retrieval, and the high-level controller (\texttt{wor
 \caption{Hardware and software configuration.}
 \centering
 \footnotesize
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
  & \textbf{Config A} & \textbf{Config B} \\
@@ -1008,9 +1009,10 @@ vLLM & 0.8.5.post1 & 0.17.1 \\
 Corpus & 100 docs & 500 docs \\
 Queries & 100 & 200 \\
 Top-$k$ & 5 & 5 \\
-Use & TTFT, overlap & All (TTFT, systems, quality, workloads, E2E, validation) \\
+Use & TTFT, overlap & All (\S\ref{sec:eval}--\ref{sec:trie_valid}) \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \section{Overlap Sweep Raw Data}
