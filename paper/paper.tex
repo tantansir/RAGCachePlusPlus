@@ -407,7 +407,7 @@ This feedback mechanism integrates all system components into a closed-loop pipe
 \item Stale trie paths are pruned automatically, keeping the trie synchronized with vLLM's actual cache residency.
 \end{enumerate}
 
-The entire integrated pipeline (\texttt{VLLMCacheProxy}) adds $<$\,0.07\,ms of scheduling overhead per request ($<$0.13\% of TTFT; see profiling in Table~\ref{tab:profiling} and Section~\ref{sec:integrated}), achieves 99.5\% prediction accuracy under sequential evaluation (Section~\ref{sec:integrated}), and requires zero vLLM modifications.
+The entire integrated pipeline (\texttt{VLLMCacheProxy}) adds $<$\,0.07\,ms of Order+Build overhead per request ($<$0.13\% of TTFT; Table~\ref{tab:profiling}). A separate profiling of the integrated proxy (Section~\ref{sec:integrated}) measures 0.049\,ms (trie 0.017 + prompt 0.032\,ms)---the difference reflects run-to-run timing variation at sub-millisecond scale. The feedback loop achieves 99.5\% prediction accuracy under sequential evaluation (Section~\ref{sec:integrated}). No vLLM modifications are required.
 
 \subsection{Retrieval-Inference Pipelining}
 
@@ -568,10 +568,10 @@ Two findings emerge: (1)~evidence order matters---natural ordering yields higher
 We profile the systems-level behavior of our ordering optimization on the RTX 4090 (Qwen2.5-7B-Instruct, vLLM~0.17.1, \texttt{enforce\_eager=True}). A key design goal of RAGCache++ is that ordering should improve TTFT \emph{without degrading} throughput, memory footprint, or tail behavior. The experiments below validate this.
 
 \paragraph{Latency profiling.}
-Table~\ref{tab:profiling} decomposes per-request latency into three stages: trie-based ordering, prompt string construction, and vLLM inference (prefill + 1-token decode). The ordering and prompt-build stages together add only \textbf{66\,$\mu$s} ($<$0.13\% of total latency), confirming negligible overhead. More importantly, the inference stage itself is \textbf{29\% faster} at p50 (41.4\,ms vs.\ 58.6\,ms) because optimized ordering extends the cached prefix, allowing vLLM to skip more prefill blocks. This reduction in GPU prefill computation is the core mechanism behind our TTFT gains in Section~\ref{sec:eval}.
+Table~\ref{tab:profiling} decomposes per-request latency into three stages: trie-based ordering, prompt string construction, and vLLM inference (prefill + 1-token decode). For APC+Optimized, Order+Build totals \textbf{66\,$\mu$s} ($<$0.13\% of total latency); note that APC+Retrieval already incurs 40\,$\mu$s for the same two stages, so the \emph{incremental} cost of trie-based ordering is only ${\sim}$26\,$\mu$s. More importantly, the inference stage itself is \textbf{29\% faster} at p50 (41.4\,ms vs.\ 58.6\,ms) because optimized ordering extends the cached prefix, allowing vLLM to skip more prefill blocks. This reduction in GPU prefill computation is the core mechanism behind our TTFT gains in Section~\ref{sec:eval}.
 
 \begin{table}[t]
-\caption{Per-request latency breakdown (RTX 4090, 195 post-warmup queries). Ordering adds 66\,$\mu$s while reducing inference p50 by 29\%.}
+\caption{Per-request latency breakdown (RTX 4090, 195 post-warmup queries). APC+Opt.\ Order+Build totals 66\,$\mu$s (incremental ${\sim}$26\,$\mu$s over APC+Retr.) while reducing inference p50 by 29\%.}
 \label{tab:profiling}
 \centering
 \small
