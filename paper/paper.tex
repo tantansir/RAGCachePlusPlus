@@ -391,7 +391,7 @@ This feedback mechanism integrates all system components into a closed-loop pipe
 \item Stale trie paths are pruned automatically, keeping the trie synchronized with vLLM's actual cache residency.
 \end{enumerate}
 
-The entire integrated pipeline (\texttt{VLLMCacheProxy}) adds only \textbf{0.049\,ms} per request ($<$0.1\% of TTFT), achieves 99.5\% prediction accuracy, and requires zero vLLM modifications.
+The entire integrated pipeline (\texttt{VLLMCacheProxy}) adds $<$\,0.07\,ms of scheduling overhead per request ($<$0.13\% of TTFT; see profiling in Table~\ref{tab:profiling} and Section~\ref{sec:integrated}), achieves 99.5\% prediction accuracy, and requires zero vLLM modifications.
 
 \subsection{Retrieval-Inference Pipelining}
 
