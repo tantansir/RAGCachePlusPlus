@@ -381,7 +381,15 @@ In a standard RAG pipeline, retrieval and inference execute serially: the LLM id
 
 The key observation is that the \emph{system prompt} (instruction header) is identical across all requests. When APC is enabled, the system prompt's KV blocks are cached after the first request. We exploit this by issuing a lightweight warmup call (system prompt only) concurrently with the retrieval query. By the time retrieval returns with document IDs, the system prompt is already cache-resident, and the full prompt's prefill need only compute the document and query tokens.
 
-Concretely, let $T_{\text{ret}}$ be retrieval latency, $T_{\text{cold}}$ be the cold-start TTFT, and $T_{\text{warm}}$ be the TTFT once the system prompt is cached. Without pipelining, end-to-end TTFT is $T_{\text{ret}} + T_{\text{cold}}$. With pipelining, the system-prompt warmup call overlaps with retrieval, yielding $\max(T_{\text{ret}}, T_{\text{pipe}}) + T_{\text{warm}}$, where $T_{\text{pipe}} = T_{\text{cold}} - T_{\text{warm}}$ is the prefill work amortized during retrieval (system-prompt prefill plus associated engine setup). The per-request saving is therefore $\min(T_{\text{ret}}, T_{\text{pipe}})$. After the first request, $T_{\text{pipe}} \rightarrow 0$ once the system prompt is cached, so the benefit is limited to cold starts and cache eviction events. Implementation requires only a \texttt{concurrent.futures.ThreadPoolExecutor} to dispatch the warmup call alongside retrieval---no engine modification is needed.
+Concretely, let $T_{\text{ret}}$ be retrieval latency, $T_{\text{sys}}$ the system-prompt prefill time, $T_{\text{warm}}$ the TTFT once the system prompt is cached, and $T_{\text{cold}}$ the cold-start TTFT. Empirically $T_{\text{cold}} = T_{\text{sys}} + T_{\text{warm}} + \delta$, where $\delta$ is a small engine-setup overhead that the warmup call amortizes. Without pipelining, end-to-end TTFT is $T_{\text{ret}} + T_{\text{cold}}$. With pipelining, the warmup call runs concurrently with retrieval, giving
+\begin{equation*}
+\text{pipelined TTFT} \;=\; \max(T_{\text{ret}}, T_{\text{sys}}) + T_{\text{warm}},
+\end{equation*}
+and per-request saving
+\begin{equation*}
+T_{\text{ret}} + T_{\text{cold}} - \max(T_{\text{ret}}, T_{\text{sys}}) - T_{\text{warm}} \;=\; \min(T_{\text{ret}}, T_{\text{sys}}) + \delta.
+\end{equation*}
+Thus the saving grows with $T_{\text{ret}}$ up to $T_{\text{sys}}$ (at which point it is capped at $T_{\text{sys}} + \delta = T_{\text{cold}} - T_{\text{warm}}$, the full overlapped prefill plus engine setup). After the first request the system prompt is cache-resident, so the benefit is limited to cold starts and cache eviction events. Implementation requires only a \texttt{concurrent.futures.ThreadPoolExecutor} to dispatch the warmup call alongside retrieval---no engine modification is needed.
 
 % ================================================================
 \section{Experiments}
@@ -571,10 +579,10 @@ APC+Optimized & 1.19 & 1{,}371 & 81.75 & 94{,}029 \\
 \paragraph{GPU memory.} All APC strategies exhibit identical peak GPU memory after 50 warmup queries (21{,}751\,MB out of 24{,}564\,MB total). vLLM pre-allocates a fixed KV cache pool based on \texttt{gpu\_memory\_utilization}; our ordering changes which blocks within this pool are reused, not the pool size. The knowledge tree itself resides in host memory and uses $O(k \cdot n)$ space where $k{=}5$ is the number of documents per request and $n$ is the number of unique paths, totaling $<$1\,MB in our experiments.
 
 \paragraph{Pipelining analysis.}
-We validate the pipelining design (Section~\ref{sec:design}) by measuring end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. Component measurements give $T_{\text{cold}} = 56.8$\,ms and $T_{\text{warm}} = 28.2$\,ms, so the effective pipelined cost is $T_{\text{pipe}} = T_{\text{cold}} - T_{\text{warm}} \approx 28$\,ms (the 21.6\,ms system-prompt prefill plus ${\sim}6$--$7$\,ms of engine setup that the warmup call amortizes). At $T_{\text{ret}} = 50$\,ms, wall-clock TTFT drops from 106.8\,ms (serial = $T_{\text{ret}} + T_{\text{cold}}$) to 78.8\,ms (pipelined = $\max(T_{\text{ret}}, T_{\text{pipe}}) + T_{\text{warm}}$), a 28.0\,ms saving that matches $T_{\text{pipe}}$ almost exactly. Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery.
+We validate the pipelining design (Section~\ref{sec:design}) by measuring end-to-end wall-clock pipelining (Table~\ref{tab:pipelining_e2e}): we issue a system-prompt warmup call, wait for a simulated retrieval delay, then generate the full prompt with the system prompt cached. Component measurements give $T_{\text{sys}} = 21.6$\,ms, $T_{\text{warm}} = 28.2$\,ms, and $T_{\text{cold}} = 56.8$\,ms, so $\delta = T_{\text{cold}} - T_{\text{sys}} - T_{\text{warm}} \approx 7$\,ms (engine-setup overhead that the warmup call absorbs). Plugging in: at $T_{\text{ret}} = 20$\,ms the formula predicts pipelined TTFT $=\max(20, 21.6)+28.2 = 49.8$\,ms (measured 50.4); at $T_{\text{ret}} = 50$\,ms it predicts $78.2$ (measured 78.8); at $T_{\text{ret}} = 100$\,ms it predicts $128.2$ (measured 128.8)---all within 0.6\,ms of the model, confirming that the $\max(T_{\text{ret}},T_{\text{sys}})+T_{\text{warm}}$ formula is accurate. The saving at $T_{\text{ret}}=50$\,ms is 28.0\,ms ($=T_{\text{sys}}+\delta$), the maximum once $T_{\text{ret}}\geq T_{\text{sys}}$. Because APC caches the system prompt after the first request, the pipelining benefit is limited to cold starts and cache eviction recovery.
 
 \begin{table}[t]
-\caption{End-to-end pipelining: measured wall-clock TTFT (RTX 4090). Serial $=T_{\text{ret}}+T_{\text{cold}}$ ($T_{\text{cold}}=56.8$\,ms); Pipelined $=\max(T_{\text{ret}},T_{\text{pipe}})+T_{\text{warm}}$ with $T_{\text{pipe}}\approx 28$\,ms, $T_{\text{warm}}=28.2$\,ms.}
+\caption{End-to-end pipelining: measured wall-clock TTFT (RTX 4090). Serial $=T_{\text{ret}}+T_{\text{cold}}$ with $T_{\text{cold}}=56.8$\,ms; Pipelined $=\max(T_{\text{ret}},T_{\text{sys}})+T_{\text{warm}}$ with $T_{\text{sys}}=21.6$\,ms and $T_{\text{warm}}=28.2$\,ms.}
 \label{tab:pipelining_e2e}
 \centering
 \small
@@ -661,7 +669,7 @@ APC+Oracle & 40.0 & 50.0 & $+29.3$\% \\
 We sweep \texttt{gpu\_memory\_utilization} from 0.78 to 0.90; ordering improvement remains \textbf{stable at 29--31\%} across all memory levels. We also rerun at \texttt{max\_model\_len}$=$2048 (vs.\ 4096): improvement remains \textbf{31.0\%}, confirming that benefits derive from prefix structure, not context-length-specific behavior.
 
 \paragraph{Generality.}
-Beyond the Qwen2.5 family, we evaluate on Microsoft Phi-3-mini-4k-instruct (3.8B parameters, \textbf{Phi architecture}): ordering achieves \textbf{18.3\% improvement}. Combined with Qwen2.5-0.5B (19.4\%), 1.5B (20.1\%), and 7B (32.7\%), benefits generalize across model scales and architectures. Sweeping $k \in \{3,5,7,10\}$ at overlap\,$=$\,0.6, improvement scales strongly at larger $k$ ($+60.3$\% at $k{=}10$, $+28.5$\% at $k{=}5$), while small-$k$ gains are noisier ($-0.3$\% at $k{=}3$, $+5.4$\% at $k{=}7$) because the absolute number of cacheable prefix tokens is small; the trend nevertheless confirms that ordering benefits grow with retrieved-document count.
+Beyond the Qwen2.5 family, we evaluate on Microsoft Phi-3-mini-4k-instruct (3.8B parameters, \textbf{Phi architecture}): ordering achieves \textbf{18.3\% improvement}. Combined with Qwen2.5-0.5B (19.4\%), 1.5B (20.1\%), and 7B (32.7\%), benefits generalize across model scales and architectures. In a separate sensitivity run (different trace seed and warmup schedule than Table~\ref{tab:main}; see the cross-table-baselines note in Section~\ref{sec:eval}), sweeping $k \in \{3,5,7,10\}$ at overlap\,$=$\,0.6 gives improvement $-0.3\%,\; +28.5\%,\; +5.4\%,\; +60.3\%$. Small-$k$ values are noisy because the absolute number of cacheable prefix tokens is small, but the overall trend---much larger gains at $k{=}10$ than at $k{=}3$---confirms that ordering benefits grow with retrieved-document count. (The $k{=}5$ point here is 28.5\%, slightly below the 32.7\% reported for $k{=}5$ in Table~\ref{tab:main} because the two runs use independent traces.)
 
 \paragraph{Geospatial workload.}
 \label{sec:spatial}
@@ -692,7 +700,7 @@ The geospatial workload has lower average Jaccard similarity (0.17 vs.\ 0.52 in 
 
 To evaluate RAGCache++ on a workload derived from real questions, we construct a corpus from the NQ-Open dataset\footnote{NQ-Open: \url{https://huggingface.co/datasets/nq_open}} using 500 question-answer pairs. We generate topically-clustered Wikipedia-style passages grouped by answer similarity and retrieve top-5 passages per query using TF-IDF similarity. This produces a high-overlap trace (mean Jaccard~$= 0.88$) reflecting concentrated topical retrieval.
 
-At this high-overlap operating point, APC alone already achieves 63\% TTFT reduction over no-cache. Ordering adds a modest further 2.3\% improvement. This is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}): at very high overlap, retrieval order already produces near-maximal prefix alignment. The NQ result confirms that our synthetic overlap sweep generalizes to real-question-derived traces---ordering benefits are concentrated in the moderate-overlap regime.
+At this high-overlap operating point, APC alone already achieves 63\% TTFT reduction over the same run's no-cache baseline. Ordering adds a modest further 2.3\% improvement. This is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}): at very high overlap, retrieval order already produces near-maximal prefix alignment. The NQ result confirms that our synthetic overlap sweep generalizes to real-question-derived traces---ordering benefits are concentrated in the moderate-overlap regime.
 
 \textbf{Mixed-topic workload.} To test a workload with heterogeneous, moderate overlap, we generate traces where each query has a 30\% probability of switching to a random topic region, producing a mix of within-burst and cross-topic queries (mean Jaccard\,$=$\,0.31, p50\,$=$\,0.43). Optimized ordering reduces p50 TTFT from 94.3\,ms to 79.0\,ms (\textbf{16.3\% improvement}), compared with only 4.5\% on the geospatial workload (Jaccard\,$=$\,0.17). This positions the practical benefit: ordering gains scale with the moderate-overlap regime (Jaccard\,$\approx$\,0.3--0.5) that characterizes multi-topic RAG deployments where users shift between related subjects.
 
@@ -938,7 +946,6 @@ The project was led by \textbf{Kaizhen Tan}, with \textbf{Rong Gu} and \textbf{M
 \bibliography{references}
 \bibliographystyle{mlsys2024}
 
-\newpage
 \appendix
 
 \section{Experimental Configuration Details}

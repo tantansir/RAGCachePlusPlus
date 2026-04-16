@@ -49,5 +49,3 @@ _poster_review.png
 _poster_samples/
 _tmp_img/
 
-# Duplicate PDFs (paper.pdf is just a copy of midterm_report.pdf)
-paper/paper.pdf

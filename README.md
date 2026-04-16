@@ -66,8 +66,8 @@ ragcache_pp/                           # Core library (~1,500 LOC)
 └── config.py                          # Configuration
 
 paper/                                 # LaTeX source (MLSys 2024 template)
-├── midterm_report.tex                 # Paper source (13 pages)
-├── midterm_report.pdf                 # Compiled paper
+├── paper.tex                 # Paper source (14 pages)
+├── paper.pdf                 # Compiled paper
 ├── references.bib                     # Bibliography
 ├── figures/                           # Generated figures
 └── gen_figures.py                     # Figure generation script
@@ -149,7 +149,7 @@ bash run_wiki.sh
 
 ## Paper
 
-`paper/midterm_report.pdf` — 13 pages, MLSys 2024 template. See the paper for full experimental details, related-work discussion, and system-level analysis.
+`paper/paper.pdf` — 14 pages, MLSys 2024 template. See the paper for full experimental details, related-work discussion, and system-level analysis.
 
 ## Citation
 
