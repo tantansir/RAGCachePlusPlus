@@ -150,9 +150,9 @@ legend_elements = [
            markeredgecolor="black", markersize=6, label="4090"),
 ]
 ax.legend(handles=legend_elements, fontsize=6, loc="upper left")
-ax.set_xlabel("Prefix Hit Rate (%)")
+ax.set_xlabel(r"Fast%$^\dagger$ Cache-Hit Proxy (%)")
 ax.set_ylabel("TTFT p50 (ms)")
-ax.set_title("Hit Rate vs. Latency", fontsize=9)
+ax.set_title(r"Fast%$^\dagger$ Proxy vs. Latency", fontsize=9)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
