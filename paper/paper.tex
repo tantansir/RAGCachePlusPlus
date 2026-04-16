@@ -507,7 +507,7 @@ We sweep the document overlap fraction from 0.0 to 0.8 on the 4060~Ti (Figure~\r
 \end{figure}
 
 \begin{itemize}
-\item The left-most point (labelled ``0.0'' on the $x$-axis) is \emph{not} true zero overlap: the trace generator enforces $\max(1, \lfloor k \cdot \text{overlap} \rfloor) = 1$ shared document even at overlap~$=0$, which combined with region-burst sampling yields an \emph{actual} Jaccard of 0.39. The 11.9\% improvement there is therefore the effect at $\text{Jaccard}\approx0.39$, not at true zero overlap. A separate controlled experiment with truly disjoint consecutive queries (Jaccard~$= 0.0$) shows only 2.2\% improvement, confirming that ordering gains are genuinely driven by document sharing, not by system-prompt artifacts.
+\item The left-most two points (labelled ``0.0'' and ``0.2'' on the $x$-axis) both map to an actual Jaccard of $\approx$0.39 (see Appendix~\ref{app:overlap}, Table~\ref{tab:overlap_raw}): the trace generator enforces $\max(1, \lfloor k \cdot \text{overlap} \rfloor) = 1$ shared document at both settings, and region-burst sampling adds further sharing, so the nominal overlap fraction does not translate monotonically to actual Jaccard below ${\sim}0.4$. The 11.9\%/11.5\% improvements at these two points are therefore the effect at Jaccard\,$\approx$\,0.39, not at true near-zero overlap. A separate controlled experiment with truly disjoint consecutive queries (Jaccard~$= 0.0$) shows only 2.2\% improvement, confirming that ordering gains are genuinely driven by document sharing, not by system-prompt artifacts.
 \item The \textbf{peak improvement of 30.0\%} occurs at overlap fraction 0.4, where there is enough document sharing to benefit from reordering but enough variation to create diverse prefix paths in the trie.
 \item At \textbf{very high overlap (0.8)}, the improvement is minimal because queries share nearly all documents and retrieval-rank order already produces near-maximal prefix overlap.
 \end{itemize}
@@ -673,12 +673,12 @@ Table~\ref{tab:baselines} compares our greedy ordering against four baselines in
 \toprule
 \textbf{Strategy} & \textbf{p50 (ms)} & \textbf{Mean (ms)} & \textbf{vs.\ Retr.} \\
 \midrule
-No Cache & 121.5 & 121.7 & -- \\
-APC+Sorted & 81.8 & 77.4 & $-35.5$\% \\
-APC+Retrieval & 60.3 & 57.6 & baseline \\
-APC+Recency & 59.5 & 56.6 & $+1.4$\% \\
-APC+Optimized (Ours) & \textbf{42.5} & \textbf{53.8} & $+29.6$\% \\
-APC+Oracle & 42.0 & 53.1 & $+30.3$\% \\
+No Cache & 121.55 & 121.73 & -- \\
+APC+Sorted & 81.75 & 77.42 & $-35.5$\% \\
+APC+Retrieval & 60.34 & 57.63 & baseline \\
+APC+Recency & 59.52 & 56.62 & $+1.4$\% \\
+APC+Optimized (Ours) & \textbf{42.50} & \textbf{53.77} & $+29.6$\% \\
+APC+Oracle & 42.04 & 53.08 & $+30.3$\% \\
 \bottomrule
 \end{tabular}%
 }
@@ -1002,6 +1002,7 @@ Use & TTFT, overlap & TTFT, systems \\
 
 \begin{table}[H]
 \caption{Raw data for overlap sensitivity (RTX 4060~Ti, Qwen2.5-1.5B-Instruct).}
+\label{tab:overlap_raw}
 \centering
 \footnotesize
 \begin{tabular}{@{}ccccc@{}}
