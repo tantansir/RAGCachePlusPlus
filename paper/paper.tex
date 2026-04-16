@@ -115,6 +115,16 @@
   note         = {Accessed: 2026-03-31}
 }
 
+@article{kwiatkowski2019nq,
+  author  = {Kwiatkowski, Tom and Palomaki, Jennimaria and Redfield, Olivia and Collins, Michael and Parikh, Ankur and Alberti, Chris and Epstein, Danielle and Polosukhin, Illia and Devlin, Jacob and Lee, Kenton and Toutanova, Kristina and Jones, Llion and Kelcey, Matthew and Chang, Ming-Wei and Dai, Andrew M. and Uszkoreit, Jakob and Le, Quoc and Petrov, Slav},
+  title   = {{Natural Questions}: A Benchmark for Question Answering Research},
+  journal = {Transactions of the Association for Computational Linguistics},
+  year    = {2019},
+  volume  = {7},
+  pages   = {453--466},
+  doi     = {10.1162/tacl_a_00276}
+}
+
 \end{filecontents*}
 
 \usepackage{microtype}
@@ -698,7 +708,7 @@ The geospatial workload has lower average Jaccard similarity (0.17 vs.\ 0.52 in 
 \subsection{Workload Diversity}
 \label{sec:nq}
 
-To evaluate RAGCache++ on a workload derived from real questions, we construct a corpus from the NQ-Open dataset\footnote{NQ-Open: \url{https://huggingface.co/datasets/nq_open}} using 500 question-answer pairs. We generate topically-clustered Wikipedia-style passages grouped by answer similarity and retrieve top-5 passages per query using TF-IDF similarity. This produces a high-overlap trace (mean Jaccard~$= 0.88$) reflecting concentrated topical retrieval.
+To evaluate RAGCache++ on a workload derived from real questions, we construct a corpus from the NQ-Open dataset\footnote{NQ-Open is the open-domain variant of Google's Natural Questions benchmark~\citep{kwiatkowski2019nq}: each item is a real Google search query paired with short answer strings extracted from English Wikipedia. HuggingFace mirror: \url{https://huggingface.co/datasets/google-research-datasets/nq_open}.} using 500 question-answer pairs. We generate topically-clustered Wikipedia-style passages grouped by answer similarity and retrieve top-5 passages per query using TF-IDF similarity. This produces a high-overlap trace (mean Jaccard~$= 0.88$) reflecting concentrated topical retrieval.
 
 At this high-overlap operating point, APC alone already achieves 63\% TTFT reduction over the same run's no-cache baseline. Ordering adds a modest further 2.3\% improvement. This is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}): at very high overlap, retrieval order already produces near-maximal prefix alignment. The NQ result confirms that our synthetic overlap sweep generalizes to real-question-derived traces---ordering benefits are concentrated in the moderate-overlap regime.
 
