@@ -927,28 +927,16 @@ We presented RAGCache++, a prompt-layer scheduling policy that improves KV cache
 \sloppy
 \emergencystretch=3em
 
-The project was led by \textbf{Kaizhen Tan}, with \textbf{Rong Gu} and \textbf{Mingyuan Li} each owning specific subsystems and experiment tracks. Module names below refer to Table~\ref{tab:modules}.
+The project was led by \textbf{Kaizhen Tan}, with \textbf{Rong Gu} and \textbf{Mingyuan Li} each owning specific subsystems and experiment tracks.
 
 \paragraph{Kaizhen Tan (lead).}
-\begin{itemize}
-\item \textbf{System and code.} Designed the overall architecture and the integration layer: \texttt{vllm\_integration/serving.py} (\texttt{VLLMCacheProxy}, \texttt{CacheStateFeedback}, \texttt{RAGCacheMiddleware}) and \texttt{vllm\_integration/prompt\_builder.py}, plus the core benchmark drivers (\texttt{benchmark\_final.py}, \texttt{benchmark\_systems.py}, \texttt{benchmark\_integrated.py}, \texttt{benchmark\_reviewer.py}). Wired the previously stand-alone cache modules into the live vLLM serving path through the 7-stage \texttt{serve\_request} loop (Listing~\ref{lst:serve}).
-\item \textbf{Experiments.} Ran the main TTFT comparison (Table~\ref{tab:main}, Figure~\ref{fig:ttft}), overlap sensitivity sweep (Figure~\ref{fig:overlap}), systems-analysis suite (Tables~\ref{tab:profiling}--\ref{tab:concurrent}, \ref{tab:baselines}), end-to-end pipeline (Tables~\ref{tab:pipelining_e2e},~\ref{tab:e2e}), integrated-pipeline / feedback-loop validation (Section~\ref{sec:integrated}), and the cross-architecture experiment on Phi-3-mini-4k-instruct. Operated the local RTX 4060~Ti machine and managed all AutoDL RTX 4090 sessions.
-\item \textbf{Writing and infrastructure.} Primary author of the Abstract, Introduction, Methodology (Sections~\ref{sec:design}--\ref{sec:feedback}), Experiments, and Implementation Details. Produced all figures via \texttt{paper/gen\_figures.py}; set up the GitHub repository (\url{https://github.com/tantansir/RAGCachePlusPlus}); maintained the LaTeX build.
-\end{itemize}
+Owned the architecture and integration layer (\texttt{serving.py}, \texttt{prompt\_builder.py}, benchmark drivers), wired the stand-alone cache modules into vLLM through the 7-stage \texttt{serve\_request} loop, and ran the main TTFT, systems-analysis, end-to-end, feedback-loop, and cross-architecture experiments on both the RTX 4060~Ti and AutoDL RTX 4090. Primary author of the Abstract, Introduction, Methodology, Experiments, and Implementation Details sections; produced all figures and set up the GitHub repository (\url{https://github.com/tantansir/RAGCachePlusPlus}).
 
 \paragraph{Rong Gu.}
-\begin{itemize}
-\item \textbf{Code.} Owned the cache subsystem: \texttt{cache/knowledge\_tree.py} (trie nodes, \texttt{prefix\_match}, eviction-aware lookup that short-circuits at \texttt{tier="none"} nodes), \texttt{cache/cache\_manager.py} (multi-tier accounting, GPU/host allocators, eviction triggers), \texttt{cache/pgdsf\_policy.py} (PGDSF priority computation), and \texttt{cache/spatial\_index.py} (geohash spatial filter consumed by the geospatial workload).
-\item \textbf{Experiments.} Designed and ran the system-validation experiments in Section~\ref{sec:trie_valid}: trie-vs-reality correlation under normal load and under cache pressure, plus the eviction-recovery measurements that characterize the feedback loop's accuracy. Designed the baseline matrix (sorted, recency, oracle, frequency-proxy) used in Table~\ref{tab:baselines} and contributed the greedy-vs-oracle approximation-quality analysis.
-\item \textbf{Writing.} Co-authored Background (Section~\ref{sec:background}, especially the APC mechanics and chained-hash analysis), the Knowledge Tree subsection of Methodology, and the Cache-State Feedback Loop subsection (Section~\ref{sec:feedback}).
-\end{itemize}
+Owned the cache subsystem (\texttt{knowledge\_tree.py}, \texttt{cache\_manager.py}, \texttt{pgdsf\_policy.py}, \texttt{spatial\_index.py}). Designed and ran the system-validation and baseline-matrix experiments (Section~\ref{sec:trie_valid}, Table~\ref{tab:baselines}). Co-authored the Background and Methodology subsections on APC mechanics, the knowledge tree, and the cache-state feedback loop.
 
 \paragraph{Mingyuan Li.}
-\begin{itemize}
-\item \textbf{Code.} Owned the workload, retrieval, and high-level controller layers: \texttt{evaluation/workload\_generator.py} (synthetic bursty-overlap, geospatial, NQ-Open, mixed-topic, and Wikipedia-style real-corpus traces), the \texttt{retrieval/} TF-IDF retriever used by the real-corpus and NQ-Open evaluations, and \texttt{serving/rag\_controller.py} (the retrieval-inference pipelining controller behind Section~\ref{sec:design}).
-\item \textbf{Experiments.} Designed and ran the answer-quality experiments---extractive QA (EM\,$=$\,1.000, Section~\ref{sec:eval}) and multi-hop reasoning (Table~\ref{tab:multihop})---on Qwen2.5-7B; ran the workload-diversity experiments (NQ-Open, mixed-topic, real-corpus, geospatial; Tables~\ref{tab:spatial},~\ref{tab:real_corpus}, Section~\ref{sec:nq}).
-\item \textbf{Writing.} Lead author of Related Work (Section~\ref{sec:background}), Discussion (Section~\ref{sec:discussion}), Conclusion (Section~\ref{sec:conclusion}), and the Limitations and Future Work paragraphs; curated \texttt{paper/references.bib}; wrote the README and helped manage the LaTeX build.
-\end{itemize}
+Owned workload generation, retrieval, and the high-level controller (\texttt{workload\_generator.py}, \texttt{retrieval/}, \texttt{rag\_controller.py}). Ran the answer-quality and workload-diversity experiments (multi-hop, NQ-Open, mixed-topic, real corpus, geospatial). Lead author of Related Work, Discussion, and Conclusion; curated \texttt{references.bib} and wrote the README.
 
 \bibliography{references}
 \bibliographystyle{mlsys2024}
