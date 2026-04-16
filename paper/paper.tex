@@ -367,7 +367,7 @@ Algorithm~\ref{alg:ordering} describes the ordering procedure. Starting at the t
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/trie_diagram.png}
-\caption{Knowledge tree example. Dark nodes are cached; gray nodes are evicted or from other branches. Given candidate set $\{A,B,C,F,D\}$, the greedy walk follows root$\to$A$\to$B$\to$C (the longest cached path), yielding a 4-document prefix hit. The remaining document is appended in retrieval-rank order.}
+\caption{Knowledge tree example. Dark nodes are cached; gray nodes are evicted or from other branches. Given candidate set $\{A,B,C,F,D\}$, the greedy walk follows root$\to$A$\to$B$\to$C$\to$D (the longest cached path), yielding a 4-document prefix hit. The remaining document (F) is appended in retrieval-rank order.}
 \label{fig:trie}
 \vspace{-1em}
 \end{figure}
@@ -590,7 +590,7 @@ APC+Opt.  & 22.2\,$\mu$s & 44.4\,$\mu$s & 52.5\,ms & 41.4\,ms & 0.13\% \\
 
 \paragraph{Throughput.}
 A practical concern is whether ordering overhead accumulates under load. Table~\ref{tab:throughput} measures end-to-end throughput generating 50 output tokens per request.
-Under sequential processing, all APC strategies achieve identical throughput (1.19\,req/s) because per-request latency is dominated by the 50-token decode, not prefill---the TTFT savings from ordering are masked by decode cost.
+Under sequential processing, both APC+Retrieval and APC+Optimized achieve identical throughput (1.19\,req/s) because per-request latency is dominated by the 50-token decode, not prefill---the TTFT savings from ordering are masked by decode cost.
 Under batched processing, APC strategies achieve \textbf{10$\times$} higher throughput than no-cache (94K vs.\ 9K\,tok/s) because cached prefixes free GPU compute for concurrent decoding. Optimized ordering matches retrieval-order throughput within 0.4\%, confirming \textbf{no material throughput regression ($<$0.4\%)}. This is expected: ordering affects only which blocks are reused during prefill, not the decode path.
 
 \begin{table}[t]
@@ -656,7 +656,7 @@ APC+Opt.  & 66.3\% & 57.6\% & 77.7\% & 185/195 \\
 \end{table}
 
 \paragraph{Concurrent load.}
-A key concern is whether ordering benefits survive when multiple requests share the GPU simultaneously. Table~\ref{tab:concurrent} measures per-request TTFT under batched processing at concurrency levels 1--8. The knowledge tree is updated \emph{between} batches, simulating realistic concurrent arrivals where ordering decisions use stale cache state. Optimized ordering provides \textbf{6.9--9.9\% TTFT reduction} across all batch sizes (7.3\% at batch~1, 7.8\% at batch~2, 9.9\% at batch~4, 6.9\% at batch~8), demonstrating that the benefit is not an artifact of sequential evaluation. Throughput also increases: at batch size~8, optimized ordering achieves 28.0\,req/s vs.\ 26.1\,req/s for retrieval order.
+A key concern is whether ordering benefits survive when multiple requests share the GPU simultaneously. Table~\ref{tab:concurrent} measures per-request TTFT under batched processing at concurrency levels 1--8. The knowledge tree is updated \emph{between} batches, simulating realistic concurrent arrivals where ordering decisions use stale cache state. Optimized ordering provides \textbf{6.8--9.9\% TTFT reduction} across all batch sizes (7.3\% at batch~1, 7.7\% at batch~2, 9.9\% at batch~4, 6.8\% at batch~8), demonstrating that the benefit is not an artifact of sequential evaluation. Throughput also increases: at batch size~8, optimized ordering achieves 28.0\,req/s vs.\ 26.1\,req/s for retrieval order.
 
 \begin{table}[t]
 \caption{Concurrent load: avg per-request TTFT at different batch sizes (RTX 4090, 200 queries). Ordering benefit persists across all concurrency levels.}
@@ -668,9 +668,9 @@ A key concern is whether ordering benefits survive when multiple requests share 
 \textbf{Batch} & \textbf{No Cache} & \textbf{APC+Retr.} & \textbf{APC+Opt.} & \textbf{Improv.} \\
 \midrule
 1 & 114.7 & 54.7 & 50.7 & 7.3\% \\
-2 & 110.5 & 48.0 & 44.3 & 7.8\% \\
+2 & 110.5 & 48.0 & 44.3 & 7.7\% \\
 4 & 103.4 & 41.6 & 37.5 & 9.9\% \\
-8 & 100.9 & 38.3 & 35.7 & 6.9\% \\
+8 & 100.9 & 38.3 & 35.7 & 6.8\% \\
 \bottomrule
 \end{tabular}
 \vspace{-0.5em}
@@ -729,7 +729,7 @@ APC+Optimized & \textbf{92.2} & \textbf{103.0} & \textbf{85.7} \\
 \vspace{-0.5em}
 \end{table}
 
-The geospatial workload has lower average Jaccard similarity (0.17 vs.\ 0.52 in the synthetic workload) because spatial retrieval produces more diverse document sets. Optimized ordering still reduces TTFT by \textbf{4.5\%} over retrieval-order APC and \textbf{16.4\%} over no-cache (Table~\ref{tab:spatial}). The smaller gain compared to the synthetic benchmark (4.5\% vs.\ 33\%) is expected: with Jaccard $= 0.17$, consecutive queries share fewer documents, leaving less room for prefix optimization. This result is consistent with the overlap sensitivity analysis (Figure~\ref{fig:overlap}), which shows diminishing returns below 0.2 overlap. For spatially concentrated workloads (e.g., a user exploring a single neighborhood), overlap would be higher and ordering gains larger.
+The geospatial workload has lower average Jaccard similarity (0.17 vs.\ 0.52 in the synthetic workload) because spatial retrieval produces more diverse document sets. Optimized ordering still reduces TTFT by \textbf{4.5\%} over retrieval-order APC and \textbf{16.4\%} over no-cache (Table~\ref{tab:spatial}). The smaller gain compared to the synthetic benchmark (4.5\% vs.\ 33\%) is expected: with Jaccard $= 0.17$, consecutive queries share fewer documents, leaving less room for prefix optimization. This is consistent with the overall trend: Figure~\ref{fig:overlap} shows gains peaking at moderate overlap and flattening at the extremes, and the separate true-zero experiment (Section~\ref{sec:eval}) confirms that gains drop to ${\sim}$2\% at Jaccard\,$=$\,0. For spatially concentrated workloads (e.g., a user exploring a single neighborhood), overlap would be higher and ordering gains larger.
 
 \subsection{Workload Diversity}
 \label{sec:nq}
@@ -741,11 +741,11 @@ We evaluate three workloads at different overlap regimes to show that the main-b
 To evaluate RAGCache++ on a workload derived from real questions, we construct a corpus from the NQ-Open dataset~\citep{kwiatkowski2019nq} using 500 question-answer pairs. We generate topically-clustered Wikipedia-style passages grouped by answer similarity and retrieve top-5 passages per query using TF-IDF similarity. This produces a \emph{high-overlap} trace (mean Jaccard $=0.88$). At this operating point APC alone already achieves 63\% TTFT reduction over the same run's No-Cache baseline, and ordering adds only a further 2.3\%---retrieval order is already near-optimal for prefix alignment, matching the overlap-sensitivity curve in Figure~\ref{fig:overlap}.
 
 \paragraph{Mixed-topic (moderate overlap, Jaccard = 0.31).}
-To test a workload with heterogeneous, moderate overlap, we generate traces where each query has a 30\% probability of switching to a random topic region, producing a mix of within-burst and cross-topic queries (mean Jaccard\,$=$\,0.31, p50\,$=$\,0.43). Optimized ordering reduces p50 TTFT from 94.3\,ms to 79.0\,ms (\textbf{16.3\% improvement}). This is the regime where ordering gains scale most naturally: multi-topic RAG deployments where users shift between related subjects (Jaccard\,$\approx$\,0.3--0.5).
+To test a workload with heterogeneous, moderate overlap, we generate traces where each query has a 30\% probability of switching to a random topic region, producing a mix of within-burst and cross-topic queries (mean Jaccard\,$=$\,0.31, p50\,$=$\,0.43). Optimized ordering reduces p50 TTFT from 94.3\,ms to 79.0\,ms (\textbf{16.2\% improvement}). This is the regime where ordering gains scale most naturally: multi-topic RAG deployments where users shift between related subjects (Jaccard\,$\approx$\,0.3--0.5).
 
 \paragraph{Real-corpus TF-IDF (low natural overlap, Jaccard = 0.06).}
 \label{sec:real_corpus}
-To move beyond explicitly controlled overlap, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to produce a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter and no explicit query-sequence clustering. The resulting mean Jaccard is only $0.06$. Table~\ref{tab:real_corpus} (values in this table correspond only to this real-corpus experiment) shows that even under this very low mean overlap, optimized ordering reduces p50 TTFT by \textbf{26.8\%} (24.8\,ms vs.\ 33.9\,ms) and mean TTFT by 20.4\%. This result may appear to conflict with the ``diminishing returns below Jaccard\,$\approx$\,0.2'' trend in Figure~\ref{fig:overlap} and the geospatial workload (4.5\% at Jaccard\,$=$\,0.17). The key difference is that the overlap sweep and geospatial workload use a single synthetic corpus with uniform document lengths, whereas the Wikipedia corpus has inherent topical structure (20 topics, each with ${\sim}$50 passages): even though the \emph{mean} Jaccard across all query pairs is only 0.06, consecutive queries on related topics can share retrieved passages at much higher rates, creating intermittent prefix-sharing bursts that the trie exploits. In other words, mean Jaccard alone does not fully predict ordering benefit---the \emph{temporal locality structure} of the query trace matters.
+To move beyond explicitly controlled overlap, we construct a diverse corpus of 1{,}000 Wikipedia-style passages spanning 20 topics (machine learning, astronomy, medicine, history, geography, physics, biology, economics, technology, literature, etc.) and use TF-IDF retrieval to produce a query trace with \emph{naturally arising} document overlap---no controlled overlap parameter and no explicit query-sequence clustering. The resulting mean Jaccard is only $0.06$. Table~\ref{tab:real_corpus} (values in this table correspond only to this real-corpus experiment) shows that even under this very low mean overlap, optimized ordering reduces p50 TTFT by \textbf{26.8\%} (24.8\,ms vs.\ 33.9\,ms) and mean TTFT by 20.4\%. This result may appear to conflict with the low gains observed at Jaccard\,$=$\,0.17 in the geospatial workload (4.5\%) and the flattening trend at the extremes of Figure~\ref{fig:overlap}. The key difference is that the overlap sweep and geospatial workload use a single synthetic corpus with uniform document lengths, whereas the Wikipedia corpus has inherent topical structure (20 topics, each with ${\sim}$50 passages): even though the \emph{mean} Jaccard across all query pairs is only 0.06, consecutive queries on related topics can share retrieved passages at much higher rates, creating intermittent prefix-sharing bursts that the trie exploits. In other words, mean Jaccard alone does not fully predict ordering benefit---the \emph{temporal locality structure} of the query trace matters.
 
 \begin{table}[t]
 \caption{Real-corpus evaluation with TF-IDF retrieval (RTX 4090, 200 queries, 1000 Wikipedia-style passages / 20 topics; mean Jaccard = 0.06, no controlled overlap).}
@@ -769,7 +769,7 @@ APC+Optimized & \textbf{24.8} & \textbf{46.5} & \textbf{27.2} & +26.8\% \\
 \subsection{End-to-End Pipeline Latency}
 \label{sec:e2e}
 
-A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} reports end-to-end TTFT---defined as the time from query arrival until the first generated token, including simulated retrieval and prompt construction---at three realistic retrieval delays. Each request additionally generates 50 output tokens to make the workload representative of full RAG serving, but the 50-token decode is \emph{not} part of the TTFT measurement. Even including retrieval overhead, ordering provides \textbf{16--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies (15.7\% at $T_{\text{ret}}{=}50$\,ms, 19.3\% at 30\,ms, 25.5\% at 10\,ms). Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (2.7--9.5\%).
+A practical RAG deployment involves retrieval latency before inference. Table~\ref{tab:e2e} reports end-to-end TTFT---defined as the time from query arrival until the first generated token, including simulated retrieval and prompt construction---at three realistic retrieval delays. Each request additionally generates 50 output tokens to make the workload representative of full RAG serving, but the 50-token decode is \emph{not} part of the TTFT measurement. Even including retrieval overhead, ordering provides \textbf{16--26\% E2E TTFT reduction} at batch size~1 across all retrieval latencies (15.6\% at $T_{\text{ret}}{=}50$\,ms, 19.3\% at 30\,ms, 25.6\% at 10\,ms). Benefits decrease at higher batch sizes (where concurrent prefills amortize the per-request savings) but remain measurable (2.7--9.5\%).
 
 \begin{table}[t]
 \caption{End-to-end TTFT (ms) including retrieval latency (RTX 4090, 200 queries; workload generates 50 output tokens per request but TTFT excludes the 50-token decode).}
@@ -781,15 +781,15 @@ A practical RAG deployment involves retrieval latency before inference. Table~\r
 \toprule
 $T_{\text{ret}}$ & \textbf{Batch} & \textbf{APC+Retr.} & \textbf{APC+Opt.} & \textbf{Improv.} \\
 \midrule
-\multirow{3}{*}{10\,ms} & 1 & 69.6 & 51.8 & 25.5\% \\
+\multirow{3}{*}{10\,ms} & 1 & 69.6 & 51.8 & 25.6\% \\
  & 4 & 51.8 & 46.9 & 9.5\% \\
- & 8 & 48.9 & 45.9 & 6.3\% \\
+ & 8 & 48.9 & 45.9 & 6.1\% \\
 \midrule
 \multirow{3}{*}{30\,ms} & 1 & 89.7 & 72.4 & 19.3\% \\
  & 4 & 71.8 & 67.8 & 5.6\% \\
- & 8 & 68.8 & 66.8 & 2.8\% \\
+ & 8 & 68.8 & 66.8 & 2.9\% \\
 \midrule
-\multirow{3}{*}{50\,ms} & 1 & 109.3 & 92.2 & 15.7\% \\
+\multirow{3}{*}{50\,ms} & 1 & 109.3 & 92.2 & 15.6\% \\
  & 4 & 91.8 & 87.4 & 4.8\% \\
  & 8 & 88.7 & 86.3 & 2.7\% \\
 \bottomrule
