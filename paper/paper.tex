@@ -260,7 +260,7 @@ The challenge for RAG is that prefix caching operates at the \emph{token} level,
 \textbf{Our approach.} We propose RAGCache++, a lightweight prompt-level optimization that reorders documents to maximize prefix sharing with cached sequences. The system maintains a \emph{knowledge tree}---a trie indexed by document-ID sequences---that tracks which document orderings are currently in the KV cache. For each new request, a greedy algorithm walks the trie to find the longest cached prefix, places those documents first, and appends the remaining documents in retrieval-rank order. This approach:
 \begin{itemize}
 \item Requires \textbf{no modification} to vLLM or any serving engine---the core ordering policy (trie walk plus prompt build) is ${\sim}$150 LOC; the full integrated system including feedback loop and FastAPI middleware is ${\sim}$2{,}200 LOC (Section~\ref{sec:impl}).
-\item Adds \textbf{negligible overhead}: the trie lookup is $O(k)$ where $k$ is the number of retrieved documents (typically 3--10).
+\item Adds \textbf{negligible overhead}: the greedy ordering is $O(k^{2})$ worst case where $k$ is the number of retrieved documents (typically 3--10); in the common case of one matching child per trie level, it is $O(k)$.
 \item Is not a new cache design but a \textbf{prompt-layer scheduling policy} that converts document overlap into APC-aligned token prefixes, complementing any prefix-caching engine.
 \end{itemize}
 While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextpilot2025}) has explored cache-aware document scheduling, our contribution is to demonstrate that a \emph{minimal, engine-agnostic} implementation---with a near-optimal greedy algorithm (prefix-length optimality ratio 0.997) and online adaptivity---achieves competitive latency reductions (20--33\%) without the complexity of engine-level modifications. We additionally describe a retrieval-inference pipelining optimization as a secondary, orthogonal contribution.
@@ -268,7 +268,7 @@ While prior work (RAGCache~\citep{jin2025ragcache}, ContextPilot~\citep{contextp
 \textbf{Research questions.} We organize the paper around five research questions:
 \begin{itemize}
 \item \textbf{RQ1.} Can pure prompt-layer scheduling (zero engine modification) capture most of the APC benefit? \emph{(Section~\ref{sec:eval}; Section~\ref{sec:systems})}
-\item \textbf{RQ2.} How close is $O(k)$ greedy to exhaustive oracle ordering? \emph{(Section~\ref{sec:design}; Section~\ref{sec:systems})}
+\item \textbf{RQ2.} How close is the greedy trie walk to exhaustive oracle ordering? \emph{(Section~\ref{sec:design}; Section~\ref{sec:systems})}
 \item \textbf{RQ3.} Does the benefit generalize across real corpora, model architectures, and overlap regimes? \emph{(Section~\ref{sec:nq}; Section~\ref{sec:systems})}
 \item \textbf{RQ4.} Can a TTFT-based feedback loop keep the trie synchronized with vLLM's actual cache state without engine instrumentation? \emph{(Section~\ref{sec:feedback}; Section~\ref{sec:trie_valid}; Section~\ref{sec:integrated})}
 \item \textbf{RQ5.} Does reordering preserve answer quality, including on multi-hop reasoning? \emph{(Section~\ref{sec:eval}; Section~\ref{sec:multihop})}
@@ -356,7 +356,7 @@ Algorithm~\ref{alg:ordering} describes the ordering procedure. Starting at the t
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{Objective.} The ordering problem can be stated as: given a candidate set $D$ and a trie $T$ recording recently cached document sequences, find the permutation $\pi$ of $D$ that maximizes the number of leading documents matching a path in $T$ (i.e., the cached prefix length). Because APC uses chained hashes, each additional matched document avoids prefilling all of that document's tokens, so maximizing prefix length directly minimizes prefill cost. The greedy trie walk is a low-overhead heuristic---$O(k)$ per request---chosen for practical simplicity; it is optimal when the trie has at most one matching child per level (often the case in our synthetic bursty setting), but does not perform multi-step lookahead.
+\textbf{Objective.} The ordering problem can be stated as: given a candidate set $D$ and a trie $T$ recording recently cached document sequences, find the permutation $\pi$ of $D$ that maximizes the number of leading documents matching a path in $T$ (i.e., the cached prefix length). Because APC uses chained hashes, each additional matched document avoids prefilling all of that document's tokens, so maximizing prefix length directly minimizes prefill cost. The greedy trie walk is $O(k^{2})$ worst case (the inner loop scans up to $|R|$ candidates at each of $k$ levels) but $O(k)$ in the common case where the trie has at most one matching child per level (often the case in our synthetic bursty setting). It does not perform multi-step lookahead.
 
 \textbf{Approximation quality.} To quantify how close the greedy heuristic is to optimal, we compute the ratio of greedy prefix length to oracle prefix length (exhaustive $k!$ search) for each query in a 200-query trace ($k{=}5$, overlap\,$=$\,0.6). The greedy algorithm achieves a mean prefix-length optimality ratio of \textbf{0.997} (1.0\,$=$\,perfect), solving 98.5\% of queries optimally. The minimum ratio observed is 0.80 (4 out of 5 documents matched vs.\ 5 out of 5), occurring only for queries at region boundaries. Note that this is the ratio of matched prefix \emph{lengths}; the ratio of TTFT \emph{reductions} is separately reported as 97.5\% in Section~\ref{sec:systems} (Table~\ref{tab:baselines}).
 
@@ -501,7 +501,7 @@ We sweep the document overlap fraction from 0.0 to 0.8 on the 4060~Ti (Figure~\r
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/overlap_sensitivity.pdf}
-\caption{TTFT improvement (optimized vs.\ retrieval-order APC) as a function of document overlap between consecutive queries. Peak improvement occurs at moderate overlap (${\sim}0.4$).}
+\caption{TTFT improvement vs.\ \emph{nominal} overlap fraction (the parameter fed to the trace generator). Note: the $x$-axis is the generator parameter, not the actual Jaccard; the 0.0 and 0.2 points both produce an actual Jaccard of $\approx$0.39 due to the generator's minimum-sharing floor (see Section~\ref{sec:eval} and Table~\ref{tab:overlap_raw}).}
 \label{fig:overlap}
 \vspace{-1em}
 \end{figure}
@@ -661,7 +661,7 @@ A key concern is whether ordering benefits survive when multiple requests share 
 \end{table}
 
 \paragraph{Baseline comparison.}
-Table~\ref{tab:baselines} compares our greedy ordering against four baselines including recency-based ordering (most recently accessed documents first) and an exhaustive oracle ($k!{=}120$ permutations). Recency ordering provides only 1.4\% improvement over retrieval order because recency does not account for \emph{positional} prefix structure. Our greedy trie walk achieves \textbf{97.5\% of oracle} TTFT reduction ($+29.6\%$ vs.\ oracle's $+30.3\%$), confirming that the $O(k)$ trie walk is near-optimal for this problem.
+Table~\ref{tab:baselines} compares our greedy ordering against four baselines including recency-based ordering (most recently accessed documents first) and an exhaustive oracle ($k!{=}120$ permutations). Recency ordering provides only 1.4\% improvement over retrieval order because recency does not account for \emph{positional} prefix structure. Our greedy trie walk achieves \textbf{97.5\% of oracle} TTFT reduction ($+29.6\%$ vs.\ oracle's $+30.3\%$), confirming that the greedy trie walk is near-optimal for this problem.
 
 \begin{table}[t]
 \caption{Ordering baselines (RTX 4090, 195 queries). All six strategies measured in a single consistent run with one shared trace. Greedy trie achieves 97.5\% of oracle's TTFT reduction (+29.6\% vs.\ oracle's +30.3\%).}
@@ -835,14 +835,14 @@ We release RAGCache++ as a self-contained Python package layered on top of vLLM 
 
 \paragraph{Greedy trie-based ordering.} The 25-line realization of Algorithm~\ref{alg:ordering} is the entire ``policy'' that yields the 20--33\% TTFT reduction. It walks the knowledge tree and only follows children whose KV is currently resident (\texttt{tier != "none"}); on the first miss, the remaining documents fall back to retrieval rank order.
 
-\begin{lstlisting}[caption={Greedy ordering (\texttt{prompt\_builder.py}). The cold-path loop appends EVERY remaining document (matching Algorithm~\ref{alg:ordering}), not just one.},label={lst:order}]
+\begin{lstlisting}[caption={Greedy ordering (\texttt{prompt\_builder.py}). \texttt{remaining} is a \texttt{set}; when multiple cached children exist at one trie level the iteration order is Python-hash-dependent (ties are rare in practice---the trie typically has one matching child per level). The cold-path loop appends every remaining document in retrieval-rank order (matching Algorithm~\ref{alg:ordering}).},label={lst:order}]
 def optimize_doc_order(doc_ids, kt):
     ordered, remaining = [], set(doc_ids)
     node = kt.root
     while remaining:
         found = False
         # Hot path: extend the cached prefix by one cached child
-        for d in list(remaining):
+        for d in list(remaining):  # set order; tie-break is hash-dependent
             child = node.get_child(d)
             if (child is not None
                 and child.kv_metadata is not None
@@ -918,10 +918,10 @@ The proxy is also wrapped as a FastAPI service (\texttt{RAGCacheMiddleware}) so 
 
 \textbf{Prompt-layer cache scheduling.}
 RAGCache++ introduces \emph{prompt-layer cache scheduling} for APC-based RAG serving, analogous to how disk I/O schedulers reorder requests to exploit spatial locality without modifying the disk firmware. The ordering policy does not modify the cache mechanism itself (APC) but determines which cache lines are populated and in what order, directly controlling the prefill--reuse trade-off. Our profiling confirms this is a genuine systems effect: optimized ordering saves 66\% of prefill computation at p50 (Table~\ref{tab:cache_eff}), reduces inference latency by 29\% (Table~\ref{tab:profiling}), with zero throughput regression and zero memory overhead. The key architectural insight is that a \emph{thin scheduling layer} between retrieval and serving can recover substantial cache locality that the retrieval stage destroys---without requiring engine-level changes. This makes the policy composable with any APC-enabled system and deployable as a drop-in middleware component.
-We emphasize that the contribution is \emph{cache-aware document ordering as a scheduling abstraction}. The trie-based greedy algorithm achieves 97.5\% of oracle TTFT reduction with $O(k)$ cost (prefix-length optimality ratio 0.997), and its online adaptivity enables it to track shifting workloads---making it the practical default for deployment.
+We emphasize that the contribution is \emph{cache-aware document ordering as a scheduling abstraction}. The trie-based greedy algorithm achieves 97.5\% of oracle TTFT reduction with $O(k^{2})$ worst-case cost ($O(k)$ typical) (prefix-length optimality ratio 0.997), and its online adaptivity enables it to track shifting workloads---making it the practical default for deployment.
 We acknowledge that the core scheduling idea is shared with concurrent work (ContextPilot~\citep{contextpilot2025}); our contribution is the \emph{deployment-ready realization}: a self-contained, engine-agnostic implementation with formal approximation guarantees, a closed-loop feedback mechanism, and comprehensive cross-workload/cross-architecture evaluation demonstrating that this simple approach is sufficient for practical RAG serving.
 
-\textbf{Relation to RAGCache.} Our knowledge tree is inspired by RAGCache's~\citep{jin2025ragcache} document-indexed trie structure, but serves a different purpose. RAGCache uses the tree for custom KV cache management within a modified serving engine; we use it solely for ordering decisions, relying on the engine's built-in APC for cache management. Our trie-based ordering achieves 97.5\% of oracle's TTFT reduction with $O(k)$ cost, confirming near-optimal scheduling quality. Our approach is complementary to RAGCache: it achieves comparable scheduling benefits without requiring engine modifications, and could be combined with RAGCache's cache management for further gains.
+\textbf{Relation to RAGCache.} Our knowledge tree is inspired by RAGCache's~\citep{jin2025ragcache} document-indexed trie structure, but serves a different purpose. RAGCache uses the tree for custom KV cache management within a modified serving engine; we use it solely for ordering decisions, relying on the engine's built-in APC for cache management. Our trie-based ordering achieves 97.5\% of oracle's TTFT reduction with $O(k^{2})$ worst-case cost ($O(k)$ typical), confirming near-optimal scheduling quality. Our approach is complementary to RAGCache: it achieves comparable scheduling benefits without requiring engine modifications, and could be combined with RAGCache's cache management for further gains.
 
 \textbf{Relation to CacheBlend.} CacheBlend~\citep{yao2025cacheblend} addresses a harder problem: reusing KV blocks regardless of position via selective recomputation. Our approach avoids this complexity entirely by converting the problem to pure prefix matching through ordering. The two approaches are complementary: CacheBlend could handle the non-prefix portion of our reordered sequences for further gains.
 
