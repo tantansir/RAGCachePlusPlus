@@ -790,6 +790,7 @@ We release RAGCache++ as a self-contained Python package layered on top of vLLM 
 \label{tab:modules}
 \centering
 \scriptsize
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Module} & \textbf{LOC} & \textbf{Role} \\
@@ -803,7 +804,8 @@ We release RAGCache++ as a self-contained Python package layered on top of vLLM 
 \texttt{serving/rag\_controller.py}    & 361 & Pipelining controller \\
 \texttt{config.py}                     & 102 & Config dataclasses \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \vspace{-0.5em}
 \end{table}
 
@@ -948,13 +950,17 @@ The project was led by \textbf{Kaizhen Tan}, with \textbf{Rong Gu} and \textbf{M
 
 \appendix
 
+% Tighten appendix section spacing
+\titlespacing*{\section}{0pt}{0.6em}{0.3em}
+
 \section{Experimental Configuration Details}
 \label{app:config}
+\vspace{-0.4em}
 
 \begin{table}[h]
 \caption{Hardware and software configuration.}
 \centering
-\small
+\footnotesize
 \begin{tabular}{@{}lll@{}}
 \toprule
  & \textbf{Config A} & \textbf{Config B} \\
@@ -970,15 +976,17 @@ Top-$k$ & 5 & 5 \\
 Use & TTFT, overlap & TTFT, systems \\
 \bottomrule
 \end{tabular}
+\vspace{-0.8em}
 \end{table}
 
 \section{Overlap Sweep Raw Data}
 \label{app:overlap}
+\vspace{-0.4em}
 
 \begin{table}[h]
-\caption{Raw data for overlap sensitivity experiment (RTX 4060~Ti, Qwen2.5-1.5B-Instruct).}
+\caption{Raw data for overlap sensitivity (RTX 4060~Ti, Qwen2.5-1.5B-Instruct).}
 \centering
-\small
+\footnotesize
 \begin{tabular}{@{}ccccc@{}}
 \toprule
 \textbf{Overlap} & \textbf{Jaccard} & \textbf{Retrieval} & \textbf{Optimized} & \textbf{Improv.} \\
@@ -991,10 +999,12 @@ Use & TTFT, overlap & TTFT, systems \\
 0.8 & 0.661 & 50.4  & 50.8  & $-0.8$\% \\
 \bottomrule
 \end{tabular}
+\vspace{-0.8em}
 \end{table}
 
 \section{Systems Benchmark Details}
 \label{app:v100}
+\vspace{-0.4em}
 
 The systems analysis in Section~\ref{sec:systems} (throughput, profiling, pipelining, memory) uses Config~B (RTX 4090) with \texttt{enforce\_eager=True} (CUDA graphs disabled for measurement stability).
 
