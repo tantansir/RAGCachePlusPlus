@@ -40,7 +40,7 @@ Evaluated on RTX 4060 Ti (Qwen2.5-1.5B), RTX 4090 (Qwen2.5-7B), plus Qwen2.5-0.5
 ## Project Structure
 
 ```
-ragcache_pp/                           # Core library (~1,500 LOC)
+ragcache_pp/                           # Full integrated system (~2,200 LOC)
 ├── cache/
 │   ├── knowledge_tree.py              # Trie for tracking cached document orderings
 │   ├── cache_manager.py               # Multi-tier cache manager (GPU / host)
