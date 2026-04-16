@@ -1,0 +1,79 @@
+{
+  "config": {
+    "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28",
+    "num_docs": 500,
+    "num_queries": 200,
+    "top_k": 5,
+    "overlap": 0.6,
+    "gpu_mem": 0.9,
+    "max_model_len": 4096
+  },
+  "timestamp": "2026-04-16 08:40:10",
+  "strategies": {
+    "no_cache": {
+      "n": 195,
+      "p50_ms": 121.55,
+      "p95_ms": 124.25,
+      "mean_ms": 121.73,
+      "std_ms": 1.53
+    },
+    "apc_sorted": {
+      "n": 195,
+      "p50_ms": 81.75,
+      "p95_ms": 118.87,
+      "mean_ms": 77.42,
+      "std_ms": 32.55
+    },
+    "apc_retrieval": {
+      "n": 195,
+      "p50_ms": 60.34,
+      "p95_ms": 118.24,
+      "mean_ms": 57.63,
+      "std_ms": 23.58
+    },
+    "apc_recency": {
+      "n": 195,
+      "p50_ms": 59.52,
+      "p95_ms": 118.71,
+      "mean_ms": 56.62,
+      "std_ms": 23.89
+    },
+    "apc_optimized": {
+      "n": 195,
+      "p50_ms": 42.5,
+      "p95_ms": 118.14,
+      "mean_ms": 53.77,
+      "std_ms": 24.8
+    },
+    "apc_oracle": {
+      "n": 195,
+      "p50_ms": 42.04,
+      "p95_ms": 118.28,
+      "mean_ms": 53.08,
+      "std_ms": 25.05
+    }
+  },
+  "improvements_vs_retrieval": {
+    "no_cache": {
+      "p50_pct": -101.44,
+      "mean_pct": -111.23
+    },
+    "apc_sorted": {
+      "p50_pct": -35.48,
+      "mean_pct": -34.34
+    },
+    "apc_recency": {
+      "p50_pct": 1.36,
+      "mean_pct": 1.75
+    },
+    "apc_optimized": {
+      "p50_pct": 29.57,
+      "mean_pct": 6.7
+    },
+    "apc_oracle": {
+      "p50_pct": 30.33,
+      "mean_pct": 7.9
+    }
+  },
+  "greedy_vs_oracle_pct": 97.5
+}
