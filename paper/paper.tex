@@ -434,7 +434,7 @@ Thus the saving grows with $T_{\text{ret}}$ up to $T_{\text{sys}}$ (at which poi
 
 \subsection{Experimental Setup}
 
-\textbf{Hardware.} We evaluate on two independent configurations (see Appendix~\ref{app:config} for details): (1)~NVIDIA RTX 4060~Ti (8\,GB VRAM) with Qwen2.5-1.5B-Instruct~\citep{qwen25tr} on vLLM~0.8.5, and (2)~NVIDIA RTX 4090 (24\,GB VRAM) with Qwen2.5-7B-Instruct~\citep{qwen25tr} on vLLM~0.17.1.
+\textbf{Hardware.} We evaluate on two independent configurations (see Appendix~\ref{app:config} for details): (1)~NVIDIA RTX 4060~Ti (8\,GB VRAM) with Qwen2.5-1.5B-Instruct~\citep{qwen25tr} on vLLM~0.8.5.post1, and (2)~NVIDIA RTX 4090 (24\,GB VRAM) with Qwen2.5-7B-Instruct~\citep{qwen25tr} on vLLM~0.17.1.
 
 \textbf{Workload.} We generate a synthetic corpus of documents (${\sim}200$ tokens each, standardized length so that each document spans a similar number of KV cache blocks, approximating the token-prefix depth per chunk) grouped into regions of 10 documents each (100 docs / 10 regions on 4060~Ti; 500 docs / 50 regions on 4090). Queries arrive in bursts of 10 from the same region with 60\% document overlap between consecutive queries (Jaccard~$\approx 0.52$). This controlled setup models bursty RAG patterns where sequential queries share retrieved context (e.g., geographic locality, topic continuity). We acknowledge that production RAG workloads may exhibit different overlap distributions.
 
@@ -1008,7 +1008,7 @@ vLLM & 0.8.5.post1 & 0.17.1 \\
 Corpus & 100 docs & 500 docs \\
 Queries & 100 & 200 \\
 Top-$k$ & 5 & 5 \\
-Use & TTFT, overlap & TTFT, systems \\
+Use & TTFT, overlap & All (TTFT, systems, quality, workloads, E2E, validation) \\
 \bottomrule
 \end{tabular}
 \end{table}
