@@ -140,6 +140,7 @@
 \usepackage{listings}
 \usepackage{enumitem}
 \usepackage{titlesec}
+\usepackage{float}  % Provides [H] strict-here float placement for appendix tables
 
 \usepackage[accepted]{mlsys2024}
 
@@ -961,7 +962,7 @@ Owned workload generation, retrieval, and the high-level controller (\texttt{wor
 \section{Experimental Configuration Details}
 \label{app:config}
 
-\begin{table}[h]
+\begin{table}[H]
 \caption{Hardware and software configuration.}
 \centering
 \footnotesize
@@ -985,7 +986,7 @@ Use & TTFT, overlap & TTFT, systems \\
 \section{Overlap Sweep Raw Data}
 \label{app:overlap}
 
-\begin{table}[h]
+\begin{table}[H]
 \caption{Raw data for overlap sensitivity (RTX 4060~Ti, Qwen2.5-1.5B-Instruct).}
 \centering
 \footnotesize
