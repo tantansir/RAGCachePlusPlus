@@ -4,6 +4,7 @@ export TMPDIR=/tmp
 export VLLM_USE_TRITON_FLASH_ATTN=0
 export HF_ENDPOINT=https://hf-mirror.com
 cd /root/ragcache_pp_project
+mkdir -p /root/ragcache_pp_project/results
 
 QWEN7B=/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28
 
@@ -15,6 +16,6 @@ python ragcache_pp/vllm_integration/benchmark_round6.py \
     --gpu-mem 0.90 \
     --enforce-eager \
     --experiments all \
-    --output /root/ragcache_pp_project/round6_results.json
+    --output /root/ragcache_pp_project/results/round6_results.json
 
 echo "=== Done at $(date) ==="

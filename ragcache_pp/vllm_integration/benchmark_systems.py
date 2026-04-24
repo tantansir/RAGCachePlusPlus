@@ -35,6 +35,7 @@ from vllm import LLM, SamplingParams
 # Add project root
 PROJ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJ)
+RESULTS_DIR = os.path.join(PROJ, "results")
 
 from ragcache_pp.cache.knowledge_tree import KnowledgeTree, KVCacheMetadata
 from ragcache_pp.vllm_integration.prompt_builder import (
@@ -838,7 +839,7 @@ def main():
     parser.add_argument("--enforce-eager", action="store_true")
     parser.add_argument("--dtype", default="auto")
     parser.add_argument("--output", default=None,
-                        help="Output JSON path (default: systems_benchmark_<gpu>.json)")
+                        help="Output JSON path (default: <project>/results/systems_benchmark_results.json)")
     parser.add_argument("--overlap", type=float, default=0.6)
     parser.add_argument("--experiments", default="all",
                         help="Comma-separated: throughput,memory,profiling,pipelining")
@@ -877,7 +878,7 @@ def main():
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
 
-    out_path = args.output or os.path.join(PROJ, "systems_benchmark_results.json")
+    out_path = args.output or os.path.join(RESULTS_DIR, "systems_benchmark_results.json")
 
     # Load existing partial results (for incremental/per-strategy runs)
     if os.path.exists(out_path):

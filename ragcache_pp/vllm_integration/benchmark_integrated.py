@@ -15,7 +15,7 @@ Usage:
     --model Qwen/Qwen2.5-7B-Instruct \
     --max-model-len 4096 --gpu-mem 0.90 \
     --enforce-eager --experiments all \
-    --output /path/to/integrated_results.json
+    --output /path/to/results/integrated_results.json
 """
 from __future__ import annotations
 import gc, json, os, statistics, subprocess, sys, time
@@ -28,6 +28,7 @@ from vllm import LLM, SamplingParams
 
 PROJ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJ)
+RESULTS_DIR = os.path.join(PROJ, "results")
 from ragcache_pp.cache.knowledge_tree import KnowledgeTree, KVCacheMetadata
 from ragcache_pp.vllm_integration.prompt_builder import build_rag_prompt, optimize_doc_order
 from ragcache_pp.vllm_integration.benchmark_real import generate_corpus, generate_rag_trace, RAGQuery
@@ -269,7 +270,7 @@ def main():
     parser.add_argument("--num-queries", type=int, default=200)
     parser.add_argument("--overlap", type=float, default=0.6)
     parser.add_argument("--output", default=None,
-                        help="Output JSON (default: <project>/integrated_results.json)")
+                        help="Output JSON (default: <project>/results/integrated_results.json)")
     parser.add_argument("--experiments", default="all",
                         help="Comma-separated: full_pipeline,feedback_loop,overhead_profile")
     args = parser.parse_args()
@@ -281,7 +282,7 @@ def main():
 
     ALL = ["full_pipeline", "feedback_loop", "overhead_profile"]
     exps = args.experiments.split(",") if args.experiments != "all" else ALL
-    out_path = args.output or os.path.join(PROJ, "integrated_results.json")
+    out_path = args.output or os.path.join(RESULTS_DIR, "integrated_results.json")
     results = {"config": {"model": args.model, "max_model_len": args.max_model_len,
                           "gpu_mem": args.gpu_mem, "enforce_eager": args.enforce_eager,
                           "num_queries": args.num_queries, "overlap": args.overlap},

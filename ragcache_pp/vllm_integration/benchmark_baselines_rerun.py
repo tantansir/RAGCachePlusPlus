@@ -127,7 +127,7 @@ def main():
     ap.add_argument("--top-k", type=int, default=5)
     ap.add_argument("--overlap", type=float, default=0.6)
     ap.add_argument("--output",
-                    default="/root/ragcache_pp_project/baselines_single_run.json")
+                    default="/root/ragcache_pp_project/results/baselines_single_run.json")
     a = ap.parse_args()
 
     print("=" * 60)

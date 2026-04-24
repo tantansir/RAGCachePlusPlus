@@ -16,7 +16,7 @@ Usage (4090):
     --max-model-len 4096 --gpu-mem 0.90 \
     --enforce-eager \
     --experiments all \
-    --output /root/autodl-tmp/reviewer_results.json
+    --output /root/autodl-tmp/ragcache_pp/results/reviewer_results.json
 """
 
 from __future__ import annotations
@@ -40,6 +40,7 @@ from vllm import LLM, SamplingParams
 
 PROJ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJ)
+RESULTS_DIR = os.path.join(PROJ, "results")
 
 from ragcache_pp.cache.knowledge_tree import KnowledgeTree, KVCacheMetadata
 from ragcache_pp.vllm_integration.prompt_builder import (
@@ -796,7 +797,7 @@ def main():
                 "quality_7b", "overlap_debug"]
     exps = args.experiments.split(",") if args.experiments != "all" else ALL_EXPS
 
-    out_path = args.output or os.path.join(PROJ, "reviewer_results.json")
+    out_path = args.output or os.path.join(RESULTS_DIR, "reviewer_results.json")
     results = {
         "config": {
             "model": args.model,

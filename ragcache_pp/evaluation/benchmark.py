@@ -237,7 +237,7 @@ def run_factorial_comparison(
     return results
 
 
-def run_full_benchmark(output_path: str = "benchmark_results.json") -> dict:
+def run_full_benchmark(output_path: str = "results/benchmark_results.json") -> dict:
     """Run the complete benchmark suite."""
     print("=" * 60)
     print("RAGCache++ Benchmark Suite")

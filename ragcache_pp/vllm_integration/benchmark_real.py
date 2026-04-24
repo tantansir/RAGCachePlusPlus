@@ -306,7 +306,7 @@ def run_benchmark(
     num_docs: int = 500,
     num_queries: int = 200,
     top_k: int = 5,
-    output_path: str = "benchmark_real_results.json",
+    output_path: str = "results/benchmark_real_results.json",
     gpu_memory_utilization: float = 0.90,
     max_model_len: int = 4096,
     enforce_eager: bool = False,
@@ -487,7 +487,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-docs", type=int, default=500)
     parser.add_argument("--num-queries", type=int, default=200)
     parser.add_argument("--top-k", type=int, default=5)
-    parser.add_argument("--output", default="benchmark_real_results.json")
+    parser.add_argument("--output", default="results/benchmark_real_results.json")
     parser.add_argument("--gpu-mem", type=float, default=0.90)
     parser.add_argument("--max-model-len", type=int, default=4096)
     parser.add_argument("--enforce-eager", action="store_true",

@@ -12,7 +12,7 @@ Usage:
     --model Qwen/Qwen2.5-7B-Instruct \
     --max-model-len 4096 --gpu-mem 0.90 \
     --enforce-eager --experiments all \
-    --output /path/to/round6_results.json
+    --output /path/to/results/round6_results.json
 """
 from __future__ import annotations
 import gc, glob, json, math, os, random, re, statistics, string
@@ -28,6 +28,7 @@ from vllm import LLM, SamplingParams
 
 PROJ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJ)
+RESULTS_DIR = os.path.join(PROJ, "results")
 from ragcache_pp.cache.knowledge_tree import KnowledgeTree, KVCacheMetadata
 from ragcache_pp.vllm_integration.prompt_builder import (
     SYSTEM_PROMPT, build_rag_prompt, optimize_doc_order)
@@ -801,7 +802,7 @@ def main():
     parser.add_argument("--enforce-eager", action="store_true")
     parser.add_argument("--dtype", default="auto")
     parser.add_argument("--output", default=None,
-                        help="Output JSON (default: <project>/round6_results.json)")
+                        help="Output JSON (default: <project>/results/round6_results.json)")
     parser.add_argument("--experiments", default="all",
                         help="Comma-separated: msmarco_real,multihop_quality,"
                              "sensitivity,freq_vs_trie (or 'all')")
@@ -818,7 +819,7 @@ def main():
     ALL_EXPS = ["msmarco_real", "multihop_quality", "sensitivity", "freq_vs_trie"]
     exps = (args.experiments.split(",") if args.experiments != "all"
             else ALL_EXPS)
-    out_path = args.output or os.path.join(PROJ, "round6_results.json")
+    out_path = args.output or os.path.join(RESULTS_DIR, "round6_results.json")
     results: dict = {
         "config": {"model": args.model, "max_model_len": args.max_model_len,
                    "gpu_mem": args.gpu_mem, "enforce_eager": args.enforce_eager,

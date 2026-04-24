@@ -19,6 +19,7 @@ export HF_HOME=$PROJECT/.hf_cache
 export TRANSFORMERS_CACHE=$PROJECT/.hf_cache
 
 cd $PROJECT
+mkdir -p results
 export VLLM_USE_TRITON_FLASH_ATTN=0
 # Force triton to use system ptxas instead of built-in LLVM backend
 # to avoid "Failed to compute parent layout for slice layout" on V100
@@ -39,7 +40,7 @@ python -m ragcache_pp.vllm_integration.benchmark_real \
     --num-docs 500 \
     --num-queries 200 \
     --top-k 5 \
-    --output benchmark_v100_results.json \
+    --output results/benchmark_v100_results.json \
     --gpu-mem 0.90 \
     --max-model-len 4096 \
     --dtype half \
@@ -49,5 +50,5 @@ echo "============================================================"
 echo "Exit code: $?"
 echo "Benchmark Complete: $(date)"
 echo "Final results:"
-cat benchmark_v100_results.json 2>/dev/null || echo "(no results file)"
+cat results/benchmark_v100_results.json 2>/dev/null || echo "(no results file)"
 echo "============================================================"

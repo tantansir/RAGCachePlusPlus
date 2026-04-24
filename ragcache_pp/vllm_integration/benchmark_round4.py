@@ -12,7 +12,7 @@ Usage:
     --max-model-len 4096 --gpu-mem 0.90 \
     --enforce-eager \
     --experiments all \
-    --output /path/to/round4_results.json
+    --output /path/to/results/round4_results.json
 """
 
 from __future__ import annotations
@@ -39,6 +39,7 @@ from vllm import LLM, SamplingParams
 
 PROJ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJ)
+RESULTS_DIR = os.path.join(PROJ, "results")
 
 from ragcache_pp.cache.knowledge_tree import KnowledgeTree, KVCacheMetadata
 from ragcache_pp.vllm_integration.prompt_builder import (
@@ -1047,7 +1048,7 @@ def main():
     parser.add_argument("--dtype", default="auto")
     parser.add_argument("--overlap", type=float, default=0.6)
     parser.add_argument("--output", default=None,
-                        help="Output JSON path (default: <project>/round4_results.json)")
+                        help="Output JSON path (default: <project>/results/round4_results.json)")
     parser.add_argument("--experiments", default="all",
                         help="Comma-separated: online_coldstart,quality_embedded,"
                              "second_model  (or 'all')")
@@ -1067,7 +1068,7 @@ def main():
     ALL_EXPS = ["online_coldstart", "quality_embedded", "second_model"]
     exps = args.experiments.split(",") if args.experiments != "all" else ALL_EXPS
 
-    out_path = args.output or os.path.join(PROJ, "round4_results.json")
+    out_path = args.output or os.path.join(RESULTS_DIR, "round4_results.json")
     results: dict = {
         "config": {
             "model": args.model,

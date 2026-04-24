@@ -181,7 +181,7 @@ def run_qa_strategy(
 def run_hotpotqa_benchmark(
     model_name: str = "Qwen/Qwen2.5-1.5B-Instruct",
     num_examples: int = 100,
-    output_path: str = "hotpotqa_results.json",
+    output_path: str = "results/hotpotqa_results.json",
     gpu_mem: float = 0.85,
     max_model_len: int = 2048,
 ):
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct")
     parser.add_argument("--num-examples", type=int, default=100)
-    parser.add_argument("--output", default="hotpotqa_results.json")
+    parser.add_argument("--output", default="results/hotpotqa_results.json")
     parser.add_argument("--gpu-mem", type=float, default=0.85)
     parser.add_argument("--max-model-len", type=int, default=2048)
     args = parser.parse_args()

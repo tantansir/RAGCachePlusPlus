@@ -1,15 +1,15 @@
 #!/bin/bash
 # Run reviewer-requested benchmarks on AutoDL RTX 4090
-# Usage: bash run_reviewer_benchmarks.sh [experiments]
+# Usage: bash scripts/run_reviewer_benchmarks.sh [experiments]
 # Examples:
-#   bash run_reviewer_benchmarks.sh              # Run all experiments
-#   bash run_reviewer_benchmarks.sh concurrent   # Run only concurrent
-#   bash run_reviewer_benchmarks.sh "concurrent,baselines"  # Run specific experiments
+#   bash scripts/run_reviewer_benchmarks.sh              # Run all experiments
+#   bash scripts/run_reviewer_benchmarks.sh concurrent   # Run only concurrent
+#   bash scripts/run_reviewer_benchmarks.sh "concurrent,baselines"  # Run specific experiments
 
 set -e
 
 EXPERIMENTS="${1:-all}"
-OUTPUT="/root/autodl-tmp/reviewer_results.json"
+OUTPUT="/root/autodl-tmp/ragcache_pp/results/reviewer_results.json"
 MODEL="Qwen/Qwen2.5-7B-Instruct"
 
 echo "=================================================="
@@ -20,6 +20,7 @@ echo "=================================================="
 
 # Ensure dependencies
 pip install datasets --quiet 2>/dev/null || true
+mkdir -p "$(dirname "$OUTPUT")"
 
 cd /root/autodl-tmp/ragcache_pp/vllm_integration
 

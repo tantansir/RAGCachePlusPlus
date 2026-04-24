@@ -14,6 +14,7 @@ export HF_DATASETS_OFFLINE=0
 pip install datasets scikit-learn scipy 2>/dev/null || true
 
 cd /root/ragcache_pp_project
+mkdir -p /root/ragcache_pp_project/results
 
 echo "=== Starting final benchmarks at $(date) ==="
 
@@ -24,7 +25,7 @@ python ragcache_pp/vllm_integration/benchmark_final.py \
     --gpu-mem 0.90 \
     --enforce-eager \
     --experiments all \
-    --output /root/ragcache_pp_project/final_results.json
+    --output /root/ragcache_pp_project/results/final_results.json
 
 echo "=== All experiments completed at $(date) ==="
-echo "Results saved to /root/ragcache_pp_project/final_results.json"
+echo "Results saved to /root/ragcache_pp_project/results/final_results.json"

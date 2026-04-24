@@ -7,6 +7,7 @@ import argparse, json, os, random, sys, time
 import numpy as np
 
 PROJ = "/root/ragcache_pp_project"
+RESULTS_DIR = os.path.join(PROJ, "results")
 sys.path.insert(0, PROJ)
 
 from ragcache_pp.vllm_integration.benchmark_round6 import (
@@ -49,7 +50,7 @@ def main():
     ap.add_argument("--gpu-mem", type=float, default=0.90)
     ap.add_argument("--enforce-eager", action="store_true")
     ap.add_argument("--dtype", default="auto")
-    ap.add_argument("--output", default="/root/ragcache_pp_project/wiki_corpus_results.json")
+    ap.add_argument("--output", default=os.path.join(RESULTS_DIR, "wiki_corpus_results.json"))
     a = ap.parse_args()
 
     print("="*60); print("Wikipedia Real-Corpus Benchmark"); print("="*60)
